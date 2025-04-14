@@ -4,4 +4,4 @@ Timed Content does not collect, store, or process any personal data from merchan
 
 The app operates entirely within the merchant’s Shopify theme and does not transmit any information externally.
 
-For questions, contact: your-email@example.com
+For questions, contact: tilanoroser@gmail.com
