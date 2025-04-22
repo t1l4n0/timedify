@@ -34,7 +34,9 @@ app.get("/auth/callback", async (req, res) => {
       return res.status(404).send("Could not find the main theme.");
     }
 
-    const redirectUrl = `https://${shop}/admin/themes/${theme.id}/editor?context=apps&activateAppId=${APP_EXTENSION_ID}`;
+    const storeName = shop.replace(".myshopify.com", "");
+    const redirectUrl = `https://admin.shopify.com/store/${storeName}/themes/${theme.id}/editor?context=apps&activateAppId=${APP_EXTENSION_ID}`;
+
 
     // Log the final redirect URL for debugging
     console.log("🔁 Redirecting user to Theme Editor:");
