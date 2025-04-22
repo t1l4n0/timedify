@@ -16,7 +16,7 @@ const {
 // Start OAuth process
 app.get("/", (req, res) => {
   const { shop } = req.query;
-  if (!shop) return res.status(400).send("Missing shop parameter");
+  if (!shop) return res.status(400).send("Missing ?shop parameter");
 
   const authUrl = buildAuthUrl(shop, SHOPIFY_API_KEY, SCOPES, REDIRECT_URI);
   res.redirect(authUrl);
@@ -34,24 +34,24 @@ app.get("/auth/callback", async (req, res) => {
       return res.status(404).send("Could not find the main theme.");
     }
 
+    // Build admin.shopify.com-style redirect URL
     const storeName = shop.replace(".myshopify.com", "");
     const redirectUrl = `https://admin.shopify.com/store/${storeName}/themes/${theme.id}/editor?context=apps&activateAppId=${APP_EXTENSION_ID}`;
 
+    // Debug output
+    console.log("🔎 Shop:", shop);
+    console.log("🎨 Active Theme ID:", theme.id);
+    console.log("➡️ Redirecting to:", redirectUrl);
 
-    // Log the final redirect URL for debugging
-    console.log("🔁 Redirecting user to Theme Editor:");
-    console.log(redirectUrl);
-
-    // Optional: Render a clickable link for manual testing
+    // Send link for manual testing, and auto-redirect
     res.send(`
-      <h2>Redirect URL ready</h2>
-      <p>If you're not automatically redirected, click the link below:</p>
-      <a href="${redirectUrl}" target="_blank">${redirectUrl}</a>
+      <h2>Redirecting you to your Theme Editor...</h2>
+      <p>If you're not redirected automatically, <a href="${redirectUrl}" target="_blank">click here</a>.</p>
       <script>window.location.href = "${redirectUrl}"</script>
     `);
   } catch (error) {
-    console.error("❌ Error during OAuth redirect:", error.response?.data || error.message);
-    res.status(500).send("There was a problem completing the authentication process.");
+    console.error("❌ Error during OAuth callback:", error.response?.data || error.message);
+    res.status(500).send("There was a problem during authentication.");
   }
 });
 
