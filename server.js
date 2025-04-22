@@ -33,11 +33,11 @@ app.get("/auth/callback", async (req, res) => {
     return res.redirect(redirectUrl);
   } catch (error) {
     console.error(error.response?.data || error.message);
-    res.status(500).send("Fehler bei der Authentifizierung oder Theme-Ermittlung.");
+    res.status(500).send("Authentication or theme determination error.");
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Shopify App läuft auf http://localhost:${PORT}`);
+  console.log(`Shopify App is running on http://localhost:${PORT}`);
 });
