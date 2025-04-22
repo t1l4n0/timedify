@@ -16,7 +16,7 @@ const {
 app.get("/", (req, res) => {
   const { shop } = req.query;
 
-  if (!shop) return res.status(400).send("Missing ?shop parameter");
+  if (!shop) return res.status(400).send("Missing shop parameter");
 
   const authUrl = buildAuthUrl(shop, SHOPIFY_API_KEY, SCOPES, REDIRECT_URI);
   res.redirect(authUrl);
