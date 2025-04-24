@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timedify App Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            color: #2a7de1;
+        }
+        p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        ol {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            background-color: #2a7de1;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #1a5db1;
+        }
+        .section-divider {
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio for YouTube */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .loom-video-container {
+            position: relative;
+            padding-bottom: 66.17647058823529%; /* Aspect ratio from Loom embed */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .loom-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Timedify!</h1>
+
+    <div class="section">
+        <h2>How to Add the Timedify App Block</h2>
+        <p>Watch this video to learn how to add the Timedify App Block to your Shopify store:</p>
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/Tvz61ykCn-I" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <p>Follow these steps to add the Timedify App Block using the Theme Editor:</p>
+        <ol>
+            <li><strong>Access the Theme Editor</strong>: Go to your Shopify Admin, navigate to <strong>Online Store > Themes</strong>, and click <strong>Customize</strong> on your active theme.</li>
+            <li><strong>Select a Section</strong>: Choose the page or section (e.g., Homepage, Product Page) where you want to add the block.</li>
+            <li><strong>Add the Block</strong>: Click <strong>+ Add block</strong>, find the <strong>Timedify</strong> App Block, and add it to the section.</li>
+            <li><strong>Configure Settings</strong>: Adjust the block’s settings (schedule, content, etc.) as needed.</li>
+            <li><strong>Save Changes</strong>: Click <strong>Save</strong> to apply the block to your store.</li>
+        </ol>
+        <p>Click the button below to open the Theme Editor in a new window and start adding the App Block.</p>
+        <button class="button" onclick="redirectToThemeEditor()">Go to Theme Editor</button>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section">
+        <h2>How to Use the Timedify App Block</h2>
+        <p>Watch this video to learn how to configure the Timedify App Block:</p>
+        <div class="loom-video-container">
+            <iframe src="https://www.loom.com/embed/e0d7fbf98460407081bab5ad1e51e43d?sid=cddd7a35-fee9-4e98-8d1f-f224aca793e4" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+        </div>
+        <p>Once the App Block is added, configure it to display dynamic, scheduled content with these steps:</p>
+        <ol>
+            <li><strong>Set the Schedule</strong>: Control when your content is visible by setting specific dates or times.</li>
+            <li><strong>Add Content</strong>: Include text, images, videos, or custom HTML to showcase in the block.</li>
+            <li><strong>Choose Element Order</strong>: Arrange the content elements in your preferred sequence.</li>
+            <li><strong>Enable Countdown</strong>: Activate a countdown timer for time-sensitive promotions or events.</li>
+            <li><strong>Customize Colors and Alignment</strong>: Adjust the block’s appearance to match your store’s branding.</li>
+        </ol>
+        <p>Preview your changes in the Theme Editor and test the block on your store’s frontend to ensure everything works as expected.</p>
+    </div>
+
+    <script>
+        function redirectToThemeEditor() {
+            // Extract the shop name from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const shop = urlParams.get('shop') || 'your-shop.myshopify.com'; // Fallback shop
+
+            // Redirect URL for the Theme Editor
+            const redirectUrl = `https://${shop}/admin/themes/current/editor?context=apps&app_id=238522761217`;
+
+            // Open the Theme Editor in a new window
+            window.open(redirectUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
