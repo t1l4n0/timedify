@@ -4,16 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <p>Redirecting to Theme Editor...</p>
+    <div class="loader"></div>
     <script>
         // Extrahiere den Shop-Namen aus den URL-Parametern
         const urlParams = new URLSearchParams(window.location.search);
-        const shop = urlParams.get('shop') || 'your-shop.myshopify.com'; // Fallback-Shop
+        const shop = urlParams.get('shop');
 
-        // Weiterleitungs-URL für den Theme-Editor
-        const redirectUrl = `https://${shop}/admin/themes/current/editor?context=apps&app_id=238522761217`;
+        if (!shop) {
+            document.body.innerHTML = '<p>Error: No shop parameter provided. Please install the app through Shopify.</p>';
+            return;
+        }
+
+        // Basis-URL für den Theme-Editor mit App-Kontext
+        let redirectUrl = `https://admin.shopify.com/store/${shop.replace('.myshopify.com', '')}/themes/current/editor?context=apps&app_id=238522761217`;
+
+        // Optional: Füge spezifische Block- und Section-Parameter hinzu (falls bekannt)
+        const blockId = 'template--24762975289667__1745326029bb1fe1c7__timed_content_app_timed_content_mCXCfB';
+        const sectionId = 'template--24762975289667__1745326029bb1fe1c7';
+        if (blockId && sectionId) {
+            redirectUrl += `&block=${blockId}&section=${sectionId}`;
+        }
 
         // Leite den Benutzer weiter
         window.location.href = redirectUrl;
