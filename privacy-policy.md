@@ -1,4 +1,4 @@
-# Privacy Policy
+# Timedify Privacy Policy
 
 Timed Content does not collect, store, or process any personal data from merchants or customers.
 
