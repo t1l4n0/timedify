@@ -73,7 +73,6 @@ export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
-  const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'info' | 'warning' | 'critical'; content: string } | null>(null);
   const [pingError, setPingError] = useState<string | null>(null);
   const { authenticatedFetch, token, loading } = useAuthenticatedFetch();
 
@@ -119,7 +118,6 @@ export default function Index() {
         
         if (result.success) {
           console.log('Review modal displayed successfully');
-          setReviewMessage({ type: 'success', content: 'Review modal displayed successfully!' });
           // Verstecke den Button nach erfolgreicher Anzeige
           setShowReviewButton(false);
         } else {
@@ -128,19 +126,16 @@ export default function Index() {
           const config = reviewCodeConfig[result.code];
           
           // Apply configuration directly (config is guaranteed to exist due to type checking)
-          setReviewMessage({ type: config.type, content: config.message });
           if (config.hideButton) {
             setShowReviewButton(false);
           }
         }
       } else {
         // Fallback falls App Bridge nicht verfügbar ist
-        setReviewMessage({ type: 'warning', content: 'Review functionality requires the Shopify Admin environment. Please try again from the Shopify Admin.' });
         setShowReviewButton(false);
       }
     } catch (error) {
       console.error('Error requesting review:', error);
-      setReviewMessage({ type: 'critical', content: 'Failed to request review. Please try again later.' });
     }
   };
 
@@ -167,19 +162,7 @@ export default function Index() {
           </Banner>
         </Layout.Section>
 
-        {/* Review Message Banner */}
-        {reviewMessage && (
-          <Layout.Section>
-            <Banner
-              title={reviewMessage.content}
-              tone={reviewMessage.type}
-              action={{
-                content: 'Dismiss',
-                onAction: () => setReviewMessage(null),
-              }}
-            />
-          </Layout.Section>
-        )}
+
 
         {/* Ping Error Banner */}
         {pingError && (
