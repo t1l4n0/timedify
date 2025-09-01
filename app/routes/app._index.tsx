@@ -50,9 +50,62 @@ export default function Index() {
   };
 
   const requestReview = async () => {
-    // Da App Bridge Reviews API nicht verfügbar ist, zeigen wir eine Info-Nachricht
-    alert('Review functionality will be available in the next update. Thank you for your interest in Timedify!');
-    setShowReviewButton(false);
+    try {
+      // Verwende das globale shopify Objekt von App Bridge v4
+      if (typeof window !== 'undefined' && window.shopify && window.shopify.reviews) {
+        const result = await window.shopify.reviews.request();
+        
+        if (result.success) {
+          console.log('Review modal displayed successfully');
+          // Verstecke den Button nach erfolgreicher Anzeige
+          setShowReviewButton(false);
+        } else {
+          console.log(`Review modal not displayed. Reason: ${result.code}: ${result.message}`);
+          // Zeige benutzerfreundliches Feedback basierend auf dem Code
+          switch (result.code) {
+            case 'already-reviewed':
+              alert('You have already reviewed this app. Thank you for your support!');
+              setShowReviewButton(false);
+              break;
+            case 'cooldown-period':
+              alert('Review request available again in 60 days. Thank you for your patience!');
+              setShowReviewButton(false);
+              break;
+            case 'annual-limit-reached':
+              alert('Review limit reached for this year. Thank you for your continued support!');
+              setShowReviewButton(false);
+              break;
+            case 'recently-installed':
+              alert('Please use the app for at least 24 hours before requesting a review.');
+              break;
+            case 'mobile-app':
+              alert('Review requests are not available on mobile devices. Please use a desktop browser.');
+              setShowReviewButton(false);
+              break;
+            case 'merchant-ineligible':
+              alert('Review not available at this time. Thank you for your interest in Timedify!');
+              setShowReviewButton(false);
+              break;
+            case 'already-open':
+            case 'open-in-progress':
+              alert('Review modal is already open or opening. Please check your browser.');
+              break;
+            case 'cancelled':
+              alert('Review request was cancelled. You can try again later.');
+              break;
+            default:
+              alert(`Review not available: ${result.message}`);
+          }
+        }
+      } else {
+        // Fallback falls App Bridge nicht verfügbar ist
+        alert('Review functionality requires the Shopify Admin environment. Please try again from the Shopify Admin.');
+        setShowReviewButton(false);
+      }
+    } catch (error) {
+      console.error('Error requesting review:', error);
+      alert('Failed to request review. Please try again later.');
+    }
   };
 
   return (
