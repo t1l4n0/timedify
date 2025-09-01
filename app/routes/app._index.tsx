@@ -56,6 +56,55 @@ export default function Index() {
     window.location.href = adminUrl;
   };
 
+  // Configuration map for review result codes
+  const reviewCodeConfig = {
+    'already-reviewed': {
+      message: 'You have already reviewed this app. Thank you for your support!',
+      type: 'success' as const,
+      hideButton: true
+    },
+    'cooldown-period': {
+      message: 'Review request available again in 60 days. Thank you for your patience!',
+      type: 'info' as const,
+      hideButton: true
+    },
+    'annual-limit-reached': {
+      message: 'Review limit reached for this year. Thank you for your continued support!',
+      type: 'info' as const,
+      hideButton: true
+    },
+    'recently-installed': {
+      message: 'Please use the app for at least 24 hours before requesting a review.',
+      type: 'warning' as const,
+      hideButton: false
+    },
+    'mobile-app': {
+      message: 'Review requests are not available on mobile devices. Please use a desktop browser.',
+      type: 'warning' as const,
+      hideButton: true
+    },
+    'merchant-ineligible': {
+      message: 'Review not available at this time. Thank you for your interest in Timedify!',
+      type: 'info' as const,
+      hideButton: true
+    },
+    'already-open': {
+      message: 'Review modal is already open or opening. Please check your browser.',
+      type: 'warning' as const,
+      hideButton: false
+    },
+    'open-in-progress': {
+      message: 'Review modal is already open or opening. Please check your browser.',
+      type: 'warning' as const,
+      hideButton: false
+    },
+    'cancelled': {
+      message: 'Review request was cancelled. You can try again later.',
+      type: 'info' as const,
+      hideButton: true
+    }
+  } as const;
+
   const requestReview = async () => {
     try {
       // Verwende das globale shopify Objekt von App Bridge v4
@@ -70,37 +119,15 @@ export default function Index() {
         } else {
           console.log(`Review modal not displayed. Reason: ${result.code}: ${result.message}`);
           // Zeige benutzerfreundliches Feedback basierend auf dem Code
-          switch (result.code) {
-            case 'already-reviewed':
-              setReviewMessage({ type: 'success', content: 'You have already reviewed this app. Thank you for your support!' });
+          const config = reviewCodeConfig[result.code];
+          if (config) {
+            setReviewMessage({ type: config.type, content: config.message });
+            if (config.hideButton) {
               setShowReviewButton(false);
-              break;
-            case 'cooldown-period':
-              setReviewMessage({ type: 'info', content: 'Review request available again in 60 days. Thank you for your patience!' });
-              setShowReviewButton(false);
-              break;
-            case 'annual-limit-reached':
-              setReviewMessage({ type: 'info', content: 'Review limit reached for this year. Thank you for your continued support!' });
-              setShowReviewButton(false);
-              break;
-            case 'recently-installed':
-              setReviewMessage({ type: 'warning', content: 'Please use the app for at least 24 hours before requesting a review.' });
-              break;
-            case 'mobile-app':
-              setReviewMessage({ type: 'warning', content: 'Review requests are not available on mobile devices. Please use a desktop browser.' });
-              setShowReviewButton(false);
-              break;
-            case 'merchant-ineligible':
-              setReviewMessage({ type: 'info', content: 'Review not available at this time. Thank you for your interest in Timedify!' });
-              setShowReviewButton(false);
-              break;
-            case 'already-open':
-            case 'open-in-progress':
-              setReviewMessage({ type: 'warning', content: 'Review modal is already open or opening. Please check your browser.' });
-              break;
-            case 'cancelled':
-              setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
-              break;
+            }
+          } else {
+            // Fallback für unbekannte Codes
+            setReviewMessage({ type: 'warning', content: `Unknown review result: ${result.code}` });
           }
         }
       } else {
