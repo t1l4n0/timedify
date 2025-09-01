@@ -14,56 +14,60 @@ import { useState, useEffect } from "react";
 import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
-import type { ReviewRequestResponse } from "~/globals";
+import type { ReviewRequestResponse, ReviewResultCode } from "~/globals";
 
 // Configuration map for review result codes - hoisted to module scope for performance
-const reviewCodeConfig = {
+const reviewCodeConfig: Record<ReviewResultCode, {
+  message: string;
+  type: 'success' | 'info' | 'warning' | 'critical';
+  hideButton: boolean;
+}> = {
   'already-reviewed': {
     message: 'You have already reviewed this app. Thank you for your support!',
-    type: 'success' as const,
+    type: 'success',
     hideButton: true
   },
   'cooldown-period': {
     message: 'Review request available again in 60 days. Thank you for your patience!',
-    type: 'info' as const,
+    type: 'info',
     hideButton: true
   },
   'annual-limit-reached': {
     message: 'Review limit reached for this year. Thank you for your continued support!',
-    type: 'info' as const,
+    type: 'info',
     hideButton: true
   },
   'recently-installed': {
     message: 'Please use the app for at least 24 hours before requesting a review.',
-    type: 'warning' as const,
+    type: 'warning',
     hideButton: false
   },
   'mobile-app': {
     message: 'Review requests are not available on mobile devices. Please use a desktop browser.',
-    type: 'warning' as const,
+    type: 'warning',
     hideButton: true
   },
   'merchant-ineligible': {
     message: 'Review not available at this time. Thank you for your interest in Timedify!',
-    type: 'info' as const,
+    type: 'info',
     hideButton: true
   },
   'already-open': {
     message: 'Review modal is already open or opening. Please check your browser.',
-    type: 'warning' as const,
+    type: 'warning',
     hideButton: false
   },
   'open-in-progress': {
     message: 'Review modal is already open or opening. Please check your browser.',
-    type: 'warning' as const,
+    type: 'warning',
     hideButton: false
   },
   'cancelled': {
     message: 'Review request was cancelled. You can try again later.',
-    type: 'info' as const,
+    type: 'info',
     hideButton: true
   }
-} as const;
+};
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
