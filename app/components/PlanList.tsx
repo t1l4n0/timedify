@@ -1,5 +1,5 @@
 import { Card, DataTable, Button } from "@shopify/polaris";
-import type { Plan } from "../routes/app.plans/route";
+import type { Plan } from "../routes/app.plans";
 
 export type PlanListProps = {
   plans: Plan[];
@@ -20,10 +20,10 @@ export function PlanList({ plans, sortColumn, sortAscending, onSortToggle }: Pla
       <DataTable
         columnContentTypes={["text", "numeric", "text"]}
         headings={[
-          <Button plain onClick={() => onSortToggle("name")} key="h-name">
+          <Button variant="plain" onClick={() => onSortToggle("name")} key="h-name">
             Name {sortColumn === "name" ? (sortAscending ? "▲" : "▼") : ""}
           </Button>,
-          <Button plain onClick={() => onSortToggle("price")} key="h-price">
+          <Button variant="plain" onClick={() => onSortToggle("price")} key="h-price">
             Price {sortColumn === "price" ? (sortAscending ? "▲" : "▼") : ""}
           </Button>,
           "Status",
