@@ -25,7 +25,7 @@ export default function Index() {
 
   useEffect(() => {
     // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
-    authenticatedFetch({ endpoint: "/api/ping" });
+    void authenticatedFetch({ endpoint: "/api/ping" }).catch(console.error);
     
     // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
     const timer = setTimeout(() => {
@@ -96,11 +96,7 @@ export default function Index() {
             case 'cancelled':
               setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
               break;
-
           }
-          
-          // Note: Exhaustive check would require handling all ReviewResultCode cases
-          // Currently all known codes are handled explicitly in the switch above
         }
       } else {
         // Fallback falls App Bridge nicht verfügbar ist
