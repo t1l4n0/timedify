@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 
+declare global {
+  interface Window {
+    ShopifyApp?: unknown;
+  }
+}
+
 interface SessionTokenData {
   token: string | null;
   loading: boolean;
@@ -20,7 +26,7 @@ export function useSessionToken(): SessionTokenData & {
       setError(null);
 
       // Prüfe ob App Bridge verfügbar ist
-      if (typeof window !== 'undefined' && (window as any).ShopifyApp) {
+      if (typeof window !== 'undefined' && window.ShopifyApp) {
         try {
           // Echten Session Token von Shopify App Bridge anfordern
           const response = await fetch('/api/session-token', {
@@ -30,7 +36,7 @@ export function useSessionToken(): SessionTokenData & {
             },
             body: JSON.stringify({
               action: 'getSessionToken',
-              shopifyApp: (window as any).ShopifyApp
+              shopifyApp: window.ShopifyApp
             })
           });
 
