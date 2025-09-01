@@ -11,7 +11,7 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { useState, useEffect } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import type { ReviewRequestResponse } from "~/globals";
@@ -21,11 +21,11 @@ export default function Index() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
   const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'info' | 'warning' | 'critical'; content: string } | null>(null);
-  const fetcher = useFetcher();
+  const { authenticatedFetch } = useAuthenticatedFetch();
 
   useEffect(() => {
     // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
-    fetcher.load("/api/ping");
+    authenticatedFetch({ endpoint: "/api/ping" });
     
     // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
     const timer = setTimeout(() => {
@@ -33,7 +33,7 @@ export default function Index() {
     }, 5000);
     
     return () => clearTimeout(timer);
-  }, [fetcher]);
+  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
