@@ -1,0 +1,54 @@
+# RULES for this Shopify app
+
+## Sprache
+Spreche mit mir auf Deutsch.
+Die gesamte App soll aber auf Englisch sein.
+
+## Architecture
+- **Embedded Admin-App** mit Shopify App Bridge. Kein direkter Admin-API-Zugriff aus dem Browser.
+- **UI** ausschließlich mit **Polaris React** (Tokens/Patterns, A11y, Dark/Light). Keine Inline-Styles.
+- **Datenfluss**: Remix **loaders/actions** → serverseitige Helpers in `app/lib/` (z. B. `shopify.server.ts`).
+- **Routing**: Remix-Routen, Resource Routes für Webhooks/Callbacks. Kein globaler Client-State für Serverdaten.
+- **Konfiguration/Security**: Secrets und Keys nur als ENV (Fly.io). CSP/`frame-ancestors` korrekt für Embedded.
+
+
+## Implementation
+- **TypeScript**: `strict`; keine `any`. Explizite Rückgabewerte für Public-APIs/Helpers.
+- **GraphQL/REST**: Nur über `@shopify/shopify-api`-Clients in `app/lib/shopify.server.ts`. Queries typisieren.
+- **Fehlerbehandlung**: Einheitliche Error-Typen (z. B. `AppError` Union) und Polaris-`Banner` im UI mit klaren Texten.
+- **Webhooks**: Eine Route je Topic (z. B. `webhooks.app_uninstalled`). Signaturprüfung verpflichtend. **Idempotenz** sicherstellen.
+- **Navigation**: ausschließlich über App Bridge. Keine FOUC/Redirect-Loops.
+- **i18n**: Keys statt Hard-Strings; deutsche Standardtexte, erweiterbar.
+
+
+## Testing & Quality
+- **Unit-Tests** mit **Vitest** (Helper/Utils/GraphQL). **Playwright** für 1–2 Smoke-Flows (z. B. Onboarding, Primary-Action).
+- **Lint/Format/Types**: `npm run typecheck && npm run lint` als Pre-Push Hook. CI blockt bei Fehlern.
+- **Accessibility**: Tastatur-Bedienbarkeit; Polaris-Komponenten verwenden; sinnvolle `aria-labels`/`aria-describedby`.
+
+
+## Performance
+- **Remix Code‑Splitting**: große Views lazy laden. Skelette/Loading-Zustände verwenden.
+- **Netzwerk**: Caching/Konditionale Abfragen; keine N+1-Requests; Webhooks kurz halten und async work auslagern.
+
+
+## Security
+- **Session/Token**: Session-Tokens aus App Bridge nur serverseitig verifizieren; keine Secrets im Client bundlen.
+- **Webhook‑Verifikation** und **nonce/state** in OAuth‑Flow. Rate‑Limit respektieren.
+
+
+## Fly.io
+- Port **3000**, Healthcheck `/health`. ENV: `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SCOPES`, `APP_URL`, `SESSION_KEYS`.
+- Produktions‑`APP_URL` muss exakt im Partner-Dashboard hinterlegt sein.
+
+
+## Deliverables pro Task
+1) **Plan** (Dateien/Änderungen als Bulletpoints)
+2) **Patch** (diffs) nur für genannte Dateien
+3) **Proof**: Check gegen RULES.md + Akzeptanzkriterien; offene Risiken nennen
+
+
+## Definition of Done
+- Akzeptanzkriterien erfüllt; keine Type-/Lint-Fehler; Tests grün
+- RULES.md konform; Polaris-UI mit A11y + Empty/Skeleton States
+- Changelog-Snippet; Migration/Backfill beschrieben (falls Daten)

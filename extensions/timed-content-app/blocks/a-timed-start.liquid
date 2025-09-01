@@ -1,0 +1,265 @@
+{% comment %}
+  Timed Content: Start Block
+  This block marks the beginning of time-controlled content
+{% endcomment %}
+
+{% liquid
+  assign start_date = block.settings.start_date | split: '.'
+  assign start_time = block.settings.start_time | default: '00:00'
+  assign end_date = block.settings.end_date | split: '.'
+  assign end_time = block.settings.end_time | default: '23:59'
+  
+  assign start_timestamp = start_date[2] | append: '-' | append: start_date[1] | append: '-' | append: start_date[0] | append: 'T' | append: start_time | append: ':00'
+  assign end_timestamp = end_date[2] | append: '-' | append: end_date[1] | append: '-' | append: end_date[0] | append: 'T' | append: end_time | append: ':00'
+  
+  assign now = 'now' | date: '%s'
+  assign start_seconds = start_timestamp | date: '%s'
+  assign end_seconds = end_timestamp | date: '%s'
+  
+  assign should_show = false
+  if start_seconds == blank or end_seconds == blank
+    assign should_show = true
+  elsif now >= start_seconds and now <= end_seconds
+    assign should_show = true
+  endif
+%}
+
+<style>
+.ts-hidden { 
+  display: none !important; 
+  visibility: hidden !important; 
+  opacity: 0 !important; 
+  position: absolute !important; 
+  left: -9999px !important; 
+  top: -9999px !important; 
+  width: 0 !important; 
+  height: 0 !important; 
+  overflow: hidden !important; 
+  pointer-events: none !important;
+  z-index: -9999 !important;
+}
+
+.ts-visible { 
+  display: block !important; 
+  visibility: visible !important; 
+  opacity: 1 !important; 
+  position: static !important; 
+  left: auto !important; 
+  top: auto !important; 
+  width: auto !important; 
+  height: auto !important; 
+  overflow: visible !important; 
+  pointer-events: auto !important;
+  z-index: auto !important;
+}
+
+.ts-display-only {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.ts-display-label {
+  font-weight: 600;
+  color: #198754;
+  margin-bottom: 8px;
+}
+
+.ts-display-value {
+  color: #333;
+  margin: 4px 0;
+}
+
+.ts-content-container {
+  transition: opacity 0.3s ease;
+}
+
+/* Make the start block narrower and left-aligned - UNIVERSAL for all themes */
+.timed-sections-start {
+  max-width: 400px;
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  /* Override any parent container spacing */
+  transform: translateX(0) !important;
+  left: 0 !important;
+  position: relative !important;
+}
+
+.ts-marker {
+  padding: 12px;
+  border: 2px dashed #198754;
+  border-radius: 6px;
+  background: rgba(25,135,84,.06);
+  font-size: 14px;
+  text-align: left;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  /* Override any parent container spacing */
+  transform: translateX(0) !important;
+  left: 0 !important;
+}
+
+/* UNIVERSAL theme overrides - work with ANY theme */
+[class*="section"] .timed-sections-start,
+[class*="Section"] .timed-sections-start,
+[class*="block"] .timed-sections-start,
+[class*="Block"] .timed-sections-start,
+[class*="content"] .timed-sections-start,
+[class*="Content"] .timed-sections-start,
+[id*="section"] .timed-sections-start,
+[id*="Section"] .timed-sections-start,
+[id*="block"] .timed-sections-start,
+[id*="Block"] .timed-sections-start,
+[id*="content"] .timed-sections-start,
+[id*="Content"] .timed-sections-start,
+[data-section-id] .timed-sections-start,
+[data-block-id] .timed-sections-start,
+.shopify-section .timed-sections-start,
+.section .timed-sections-start,
+.timed-sections-start {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  transform: translateX(0) !important;
+  left: 0 !important;
+  position: relative !important;
+}
+
+/* Force left alignment for the entire block structure - UNIVERSAL */
+.timed-sections-start,
+.timed-sections-start > *,
+.timed-sections-start .ts-marker,
+.timed-sections-start [class*="marker"],
+.timed-sections-start [class*="Marker"] {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  transform: translateX(0) !important;
+  left: 0 !important;
+}
+
+/* Target the blue dashed border container specifically */
+.shopify-section .timed-sections-start,
+.section .timed-sections-start,
+[data-section-id] .timed-sections-start,
+.timed-sections-start {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  transform: translateX(0) !important;
+  left: 0 !important;
+  position: relative !important;
+}
+
+/* Force left alignment for the entire block structure */
+.timed-sections-start,
+.timed-sections-start > *,
+.timed-sections-start .ts-marker {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  transform: translateX(0) !important;
+  left: 0 !important;
+}
+</style>
+
+<div id="timed-sections-start-{{ block.id }}"
+     class="timed-sections-start"
+     data-start-datetime="{% if block.settings.start_date %}{{ block.settings.start_date }} {{ block.settings.start_time | default: '00:00' }}{% endif %}"
+     data-end-datetime="{% if block.settings.end_date %}{{ block.settings.end_date }} {{ block.settings.end_time | default: '23:59' }}{% endif %}"
+     style="{% unless request.design_mode %}display:none!important;{% endunless %}">
+  {% if request.design_mode %}
+  <div class="ts-marker">
+    <div class="ts-display-only">
+      <div class="ts-display-label">Timed Content starts here:</div>
+      
+      {% if block.settings.start_date or block.settings.end_date %}
+        {% if block.settings.start_date %}
+          <div class="ts-display-value">Start: {{ block.settings.start_date }}{% if block.settings.start_time and block.settings.start_time != blank and block.settings.start_time != '' and block.settings.start_time != ' ' %} {{ block.settings.start_time }}{% else %} 0:00{% endif %}</div>
+        {% endif %}
+        
+        {% if block.settings.end_date %}
+          <div class="ts-display-value">End: {{ block.settings.end_date }}{% if block.settings.end_time and block.settings.end_time != blank and block.settings.end_time != '' and block.settings.end_time != ' ' %} {{ block.settings.end_time }}{% else %} 23:59{% endif %}</div>
+        {% endif %}
+      {% else %}
+        <div class="ts-display-value" style="color: #155724;">
+          Always visible (no dates set)
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <!-- Display only on storefront -->
+  <div class="ts-display-only">
+    <strong>Timed Content starts here:</strong><br>
+    {% if block.settings.start_date or block.settings.end_date %}
+      {% if block.settings.start_date %}
+        Start: {{ block.settings.start_date }}{% if block.settings.start_time and block.settings.start_time != blank and block.settings.start_time != '' and block.settings.start_time != ' ' %} {{ block.settings.start_time }}{% else %} 0:00{% endif %}
+      {% endif %}
+      {% if block.settings.end_date %}
+        <br>End: {{ block.settings.end_date }}{% if block.settings.end_time and block.settings.end_time != blank and block.settings.end_time != '' and block.settings.end_time != ' ' %} {{ block.settings.end_time }}{% else %} 23:59{% endif %}
+      {% endif %}
+    {% else %}
+      Always visible
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% comment %}
+  Content visibility control - hide immediately if expired
+{% endcomment %}
+<div id="timed-sections-content-{{ block.id }}" 
+     class="timed-sections-content"
+     style="{% unless should_show %}display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; left: -9999px !important; top: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;{% endunless %}"
+     data-should-show="{{ should_show }}">
+  <!-- Content will be placed here by JavaScript -->
+</div>
+
+<script src="{{ 'timed-sections.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "1. Timed Content: Start",
+  "target": "section",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "⏰ Time Settings"
+    },
+    {
+      "type": "text",
+      "id": "start_date",
+      "label": "Start Date",
+      "placeholder": "DD.MM.YYYY",
+      "default": "01.01.2025"
+    },
+    {
+      "type": "text",
+      "id": "start_time",
+      "label": "Start Time",
+      "placeholder": "09:00",
+      "default": "00:00"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End Date",
+      "placeholder": "DD.MM.YYYY",
+      "default": "31.12.2025"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End Time",
+      "placeholder": "18:00",
+      "default": "23:59"
+    }
+  ]
+}
+{% endschema %}
