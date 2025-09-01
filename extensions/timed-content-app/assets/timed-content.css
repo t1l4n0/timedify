@@ -279,15 +279,12 @@
 
 /* Print Styles */
 @media print {
-  .timed-content.inactive {
-    display: none !important;
+  .timed-content.inactive,
+  .timed-content .countdown-container {
+    display: none;
   }
-  
-  .countdown-container {
-    display: none !important;
-  }
-  
-  .button {
+
+  .timed-content .button {
     border: 1px solid #000;
     background: transparent;
     color: #000;
