@@ -96,11 +96,7 @@ export default function Index() {
             case 'cancelled':
               setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
               break;
-            default: {
-              // Type-safe access to message property
-              const declinedResult = result as ReviewRequestResponse & { success: false };
-              setReviewMessage({ type: 'warning', content: `Review not available: ${declinedResult.message || 'Unknown error'}` });
-            }
+
           }
         }
       } else {
