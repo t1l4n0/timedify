@@ -75,9 +75,11 @@ export default function Index() {
   const [showReviewButton, setShowReviewButton] = useState(false);
   const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'info' | 'warning' | 'critical'; content: string } | null>(null);
   const [pingError, setPingError] = useState<string | null>(null);
-  const { authenticatedFetch } = useAuthenticatedFetch();
+  const { authenticatedFetch, token, loading } = useAuthenticatedFetch();
 
   useEffect(() => {
+    if (loading || !token) return;
+
     // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
     void authenticatedFetch({ endpoint: "/api/ping" })
       .then(() => {
@@ -88,14 +90,14 @@ export default function Index() {
         console.error('Token ping failed:', error);
         setPingError('Failed to validate session token. Please refresh the page.');
       });
-    
+
     // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
     const timer = setTimeout(() => {
       setShowReviewButton(true);
     }, 5000);
-    
+
     return () => clearTimeout(timer);
-  }, [authenticatedFetch]);
+  }, [authenticatedFetch, token, loading]);
 
   const videoId = 'Tvz61ykCn-I';
   // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
