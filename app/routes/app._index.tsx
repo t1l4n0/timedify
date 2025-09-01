@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
-import type { ReviewRequestResponse, ReviewResultCode } from "~/globals";
+import type { ReviewRequestResponse } from "~/globals";
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
@@ -96,8 +96,11 @@ export default function Index() {
             case 'cancelled':
               setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
               break;
-            default:
-              setReviewMessage({ type: 'warning', content: `Review not available: ${(result as any).message || 'Unknown error'}` });
+            default: {
+              // Type-safe access to message property
+              const declinedResult = result as ReviewRequestResponse & { success: false };
+              setReviewMessage({ type: 'warning', content: `Review not available: ${declinedResult.message || 'Unknown error'}` });
+            }
           }
         }
       } else {
