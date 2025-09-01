@@ -98,6 +98,9 @@ export default function Index() {
               break;
 
           }
+          
+          // Note: Exhaustive check would require handling all ReviewResultCode cases
+          // Currently all known codes are handled explicitly in the switch above
         }
       } else {
         // Fallback falls App Bridge nicht verfügbar ist
