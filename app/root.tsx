@@ -1,4 +1,4 @@
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, HeadersFunction } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import { json, type SerializeFrom } from "@remix-run/node";
 
@@ -12,6 +12,16 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: "https://cdn.shopify.com/static/fonts/inter/v4/styles.css" },
   { rel: "stylesheet", href: polarisStylesUrl },
 ];
+
+export const headers: HeadersFunction = () => {
+  return {
+    // Erlaubt Einbettung im Admin und Shop-Domain, blockt sonstige Frames
+    "Content-Security-Policy":
+      "frame-ancestors https://admin.shopify.com https://*.myshopify.com;",
+    // HTML nie cachen (kurzlebige host/shop/Token-Parameter)
+    "Cache-Control": "private, no-store",
+  };
+};
 
 export async function loader() {
   return json(
