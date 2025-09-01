@@ -14,11 +14,13 @@ import { useState, useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
+import type { ReviewRequestResponse, ReviewResultCode } from "~/globals";
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'info' | 'warning' | 'critical'; content: string } | null>(null);
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -53,10 +55,11 @@ export default function Index() {
     try {
       // Verwende das globale shopify Objekt von App Bridge v4
       if (typeof window !== 'undefined' && window.shopify && window.shopify.reviews) {
-        const result = await window.shopify.reviews.request();
+        const result: ReviewRequestResponse = await window.shopify.reviews.request();
         
         if (result.success) {
           console.log('Review modal displayed successfully');
+          setReviewMessage({ type: 'success', content: 'Review modal displayed successfully!' });
           // Verstecke den Button nach erfolgreicher Anzeige
           setShowReviewButton(false);
         } else {
@@ -64,47 +67,47 @@ export default function Index() {
           // Zeige benutzerfreundliches Feedback basierend auf dem Code
           switch (result.code) {
             case 'already-reviewed':
-              alert('You have already reviewed this app. Thank you for your support!');
+              setReviewMessage({ type: 'success', content: 'You have already reviewed this app. Thank you for your support!' });
               setShowReviewButton(false);
               break;
             case 'cooldown-period':
-              alert('Review request available again in 60 days. Thank you for your patience!');
+              setReviewMessage({ type: 'info', content: 'Review request available again in 60 days. Thank you for your patience!' });
               setShowReviewButton(false);
               break;
             case 'annual-limit-reached':
-              alert('Review limit reached for this year. Thank you for your continued support!');
+              setReviewMessage({ type: 'info', content: 'Review limit reached for this year. Thank you for your continued support!' });
               setShowReviewButton(false);
               break;
             case 'recently-installed':
-              alert('Please use the app for at least 24 hours before requesting a review.');
+              setReviewMessage({ type: 'warning', content: 'Please use the app for at least 24 hours before requesting a review.' });
               break;
             case 'mobile-app':
-              alert('Review requests are not available on mobile devices. Please use a desktop browser.');
+              setReviewMessage({ type: 'warning', content: 'Review requests are not available on mobile devices. Please use a desktop browser.' });
               setShowReviewButton(false);
               break;
             case 'merchant-ineligible':
-              alert('Review not available at this time. Thank you for your interest in Timedify!');
+              setReviewMessage({ type: 'info', content: 'Review not available at this time. Thank you for your interest in Timedify!' });
               setShowReviewButton(false);
               break;
             case 'already-open':
             case 'open-in-progress':
-              alert('Review modal is already open or opening. Please check your browser.');
+              setReviewMessage({ type: 'warning', content: 'Review modal is already open or opening. Please check your browser.' });
               break;
             case 'cancelled':
-              alert('Review request was cancelled. You can try again later.');
+              setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
               break;
             default:
-              alert(`Review not available: ${result.message}`);
+              setReviewMessage({ type: 'warning', content: `Review not available: ${(result as any).message || 'Unknown error'}` });
           }
         }
       } else {
         // Fallback falls App Bridge nicht verfügbar ist
-        alert('Review functionality requires the Shopify Admin environment. Please try again from the Shopify Admin.');
+        setReviewMessage({ type: 'warning', content: 'Review functionality requires the Shopify Admin environment. Please try again from the Shopify Admin.' });
         setShowReviewButton(false);
       }
     } catch (error) {
       console.error('Error requesting review:', error);
-      alert('Failed to request review. Please try again later.');
+      setReviewMessage({ type: 'critical', content: 'Failed to request review. Please try again later.' });
     }
   };
 
@@ -130,6 +133,20 @@ export default function Index() {
             </p>
           </Banner>
         </Layout.Section>
+
+        {/* Review Message Banner */}
+        {reviewMessage && (
+          <Layout.Section>
+            <Banner
+              title={reviewMessage.content}
+              tone={reviewMessage.type}
+              action={{
+                content: 'Dismiss',
+                onAction: () => setReviewMessage(null),
+              }}
+            />
+          </Layout.Section>
+        )}
 
         
 
