@@ -12,7 +12,8 @@
     "extension:deploy": "shopify app deploy",
     "extension:info": "shopify app info",
     "build:all": "npm run build && npm run extension:build",
-    "deploy:all": "npm run extension:deploy"
+    "deploy:all": "npm run extension:deploy",
+    "test": "vitest"
   },
   "type": "module",
   "engines": {
@@ -41,10 +42,14 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^7.0.2",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "jsdom": "^26.1.0",
     "terser": "^5.43.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "vitest": "^3.2.4"
   },
   "sideEffects": false
 }
