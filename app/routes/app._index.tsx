@@ -258,8 +258,8 @@ export default function Index() {
           </Card>
         </Layout.Section>
 
-        {/* Review Request Section - wird nach 5 Sekunden angezeigt */}
-        {showReviewButton && (
+        {/* Review Request Section - immer sichtbar */}
+        {true && (
           <Layout.Section>
             <Card>
               <div style={{ padding: "1rem", textAlign: "center" }}>
