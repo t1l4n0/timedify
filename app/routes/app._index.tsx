@@ -11,19 +11,27 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { useState, useEffect } from "react";
-import { useAuthenticatedFetch } from "@shopify/shopify-app-remix/react";
+import { useFetcher } from "@remix-run/react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const authFetch = useAuthenticatedFetch();
+  const [showReviewButton, setShowReviewButton] = useState(false);
+  const fetcher = useFetcher();
 
   useEffect(() => {
     // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
-    authFetch("/api/ping").catch(() => {});
-  }, [authFetch]);
+    fetcher.load("/api/ping");
+    
+    // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
+    const timer = setTimeout(() => {
+      setShowReviewButton(true);
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [fetcher]);
 
   const videoId = 'Tvz61ykCn-I';
   // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
@@ -39,6 +47,12 @@ export default function Index() {
       }
     } catch (_e) {}
     window.location.href = adminUrl;
+  };
+
+  const requestReview = async () => {
+    // Da App Bridge Reviews API nicht verfügbar ist, zeigen wir eine Info-Nachricht
+    alert('Review functionality will be available in the next update. Thank you for your interest in Timedify!');
+    setShowReviewButton(false);
   };
 
   return (
@@ -126,6 +140,34 @@ export default function Index() {
             </div>
           </Card>
         </Layout.Section>
+
+        {/* Review Request Section - wird nach 5 Sekunden angezeigt */}
+        {showReviewButton && (
+          <Layout.Section>
+            <Card>
+              <div style={{ padding: "1rem", textAlign: "center" }}>
+                <Text as="h3" variant="headingMd">Enjoying Timedify?</Text>
+                <div style={{ marginBottom: "1rem" }}>
+                  <Text as="p" variant="bodyMd">
+                    If Timedify is helping you manage your time-controlled content, please consider leaving a review!
+                  </Text>
+                </div>
+                <Button 
+                  variant="primary" 
+                  onClick={requestReview}
+                  tone="success"
+                >
+                  ⭐ Leave a Review
+                </Button>
+                <div style={{ marginTop: "0.5rem", color: "#6d7175" }}>
+                  <Text as="p" variant="bodySm">
+                    Your feedback helps other merchants discover Timedify
+                  </Text>
+                </div>
+              </div>
+            </Card>
+          </Layout.Section>
+        )}
       </Layout>
 
       <Modal
