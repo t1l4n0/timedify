@@ -1,4 +1,6 @@
-import { useSessionToken } from "~/hooks/useSessionToken";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import type { ClientApplication } from "@shopify/app-bridge";
+import { getSessionToken } from "@shopify/app-bridge/utilities";
 
 export interface AuthenticatedFetchOptions extends RequestInit {
   endpoint: string;
@@ -7,20 +9,19 @@ export interface AuthenticatedFetchOptions extends RequestInit {
 }
 
 export function useAuthenticatedFetch() {
-  const { token, loading, error } = useSessionToken();
+  const app = useAppBridge();
 
-  const authenticatedFetch = async (options: AuthenticatedFetchOptions) => {
-    if (!token) {
-      throw new Error("No session token available");
-    }
-
-
-
-    const { endpoint, method = "GET", body, ...fetchOptions } = options;
+  return async function authenticatedFetch({
+    endpoint,
+    method = "GET",
+    body,
+    ...fetchOptions
+  }: AuthenticatedFetchOptions) {
+    const token = await getSessionToken(app as unknown as ClientApplication<any>);
 
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       ...fetchOptions.headers,
     };
 
@@ -34,55 +35,12 @@ export function useAuthenticatedFetch() {
       config.body = JSON.stringify(body);
     }
 
-    try {
-      const response = await fetch(endpoint, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error("Authenticated fetch error:", error);
-      throw error;
-    }
-  };
-
-  return {
-    authenticatedFetch,
-    token,
-    loading,
-    error,
-  };
-}
-
-// Server-seitige Version für Loader/Action
-export async function serverAuthenticatedFetch(
-  endpoint: string, 
-  sessionToken: string, 
-  options: RequestInit = {}
-) {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${sessionToken}`,
-    ...options.headers,
-  };
-
-  const config: RequestInit = {
-    ...options,
-    headers,
-  };
-
-  try {
     const response = await fetch(endpoint, config);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error("Server authenticated fetch error:", error);
-    throw error;
-  }
+
+    return response.json();
+  };
 }

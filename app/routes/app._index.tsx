@@ -74,13 +74,10 @@ export default function Index() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
   const [pingError, setPingError] = useState<string | null>(null);
-  const { authenticatedFetch, token, loading } = useAuthenticatedFetch();
+  const authenticatedFetch = useAuthenticatedFetch();
 
   useEffect(() => {
-    if (loading || !token) return;
-
-    // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
-    void authenticatedFetch({ endpoint: "/api/ping" })
+    authenticatedFetch({ endpoint: "/api/ping" })
       .then(() => {
         // Clear any previous ping errors on success
         setPingError(null);
@@ -92,7 +89,7 @@ export default function Index() {
 
     // Zeige Review-Button sofort (für bessere Benutzerfreundlichkeit)
     setShowReviewButton(true);
-  }, [authenticatedFetch, token, loading]);
+  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
