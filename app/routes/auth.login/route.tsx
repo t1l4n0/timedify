@@ -10,7 +10,8 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
-import polarisTranslations from "@shopify/polaris/locales/en.json";
+import { useI18n } from "@shopify/react-i18n";
+import { POLARIS_LOCALES, getLocale } from "~/locales";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 
 import { login } from "../../shopify.server";
@@ -21,8 +22,9 @@ export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
+  const locale = getLocale(request);
 
-  return { errors, polarisTranslations };
+  return { errors, polarisTranslations: POLARIS_LOCALES[locale] };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -37,6 +39,7 @@ export default function Auth() {
   const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [shop, setShop] = useState("");
+  const [i18n] = useI18n();
   const { errors } = actionData || loaderData;
 
   return (
@@ -46,19 +49,19 @@ export default function Auth() {
           <Form method="post">
             <FormLayout>
               <Text variant="headingMd" as="h2">
-                Log in
+                {i18n.translate("login.title")}
               </Text>
               <TextField
                 type="text"
                 name="shop"
-                label="Shop domain"
-                helpText="example.myshopify.com"
+                label={i18n.translate("login.shopDomainLabel")}
+                helpText={i18n.translate("login.shopDomainHelp")}
                 value={shop}
                 onChange={setShop}
                 autoComplete="on"
                 error={errors.shop}
               />
-              <Button submit>Log in</Button>
+              <Button submit>{i18n.translate("login.submit")}</Button>
             </FormLayout>
           </Form>
         </Card>

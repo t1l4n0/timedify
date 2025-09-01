@@ -2,9 +2,10 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useRouteError, isRouteErrorResponse, useRouteLoaderData } from "@remix-run/react";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { authenticate } from "~/shopify.server";
-import de from "@shopify/polaris/locales/de.json";
 import type { SerializeFrom } from "@remix-run/node";
-import { Page, Layout, Card, Text, Banner, Button } from "@shopify/polaris";
+import { Page, Layout, Card, Text, Banner } from "@shopify/polaris";
+import { useI18n } from "@shopify/react-i18n";
+import { POLARIS_LOCALES, getLocale } from "~/locales";
 import type { RootLoaderData } from "~/root";
 
 export const APP_ROUTE_ID = "routes/app" as const;
@@ -35,10 +36,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
     hasActiveSub = false;
   }
   
+  const locale = getLocale(request);
   return json(
     {
       apiKey,
-      polarisTranslations: de,
+      polarisTranslations: POLARIS_LOCALES[locale],
       shop: session.shop,
       hasActiveSub,
     },
@@ -65,10 +67,15 @@ export default function AppLayout() {
 // Polaris-konforme ErrorBoundary für saubere Admin-UI
 export function ErrorBoundary() {
   const error = useRouteError();
-  
-  let errorMessage = "An unexpected error occurred.";
+
+  const [i18n] = useI18n();
+  const rootData = useRouteLoaderData("root") as RootLoaderData;
+  const locale = rootData.locale;
+  const polarisTranslations = POLARIS_LOCALES[locale];
+
+  let errorMessage = i18n.translate("errorBoundary.unexpected");
   let errorDetails = "";
-  
+
   if (isRouteErrorResponse(error)) {
     errorMessage = `Error ${error.status}: ${error.statusText}`;
     errorDetails = error.data?.message || "";
@@ -76,26 +83,23 @@ export function ErrorBoundary() {
     errorMessage = error.message;
     errorDetails = error.stack || "";
   }
-  
-  // Robuster apiKey aus Root-Loader beziehen
-  const rootData = useRouteLoaderData("root") as RootLoaderData;
-  
+
   return (
-    <AppProvider 
-      isEmbeddedApp 
-      apiKey={rootData?.apiKey ?? ""} 
-      i18n={de}
+    <AppProvider
+      isEmbeddedApp
+      apiKey={rootData?.apiKey ?? ""}
+      i18n={polarisTranslations}
     >
-      <Page title="Error">
+      <Page title={i18n.translate("errorBoundary.title")}>
         <Layout>
           <Layout.Section>
             <Card>
               <div style={{ padding: "1rem" }}>
                 <Banner
-                  title="Something went wrong"
+                  title={i18n.translate("errorBoundary.somethingWrong")}
                   tone="critical"
                   action={{
-                    content: "Try again",
+                    content: i18n.translate("errorBoundary.tryAgain"),
                     onAction: () => window.location.reload(),
                   }}
                 >
@@ -106,17 +110,19 @@ export function ErrorBoundary() {
                     <details style={{ marginTop: "1rem" }}>
                       <summary style={{ cursor: "pointer", color: "#6d7175" }}>
                         <Text as="span" variant="bodySm">
-                          Show error details
+                          {i18n.translate("errorBoundary.showDetails")}
                         </Text>
                       </summary>
-                      <pre style={{ 
-                        marginTop: "0.5rem", 
-                        padding: "0.5rem", 
-                        backgroundColor: "#f6f6f7", 
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        overflow: "auto"
-                      }}>
+                      <pre
+                        style={{
+                          marginTop: "0.5rem",
+                          padding: "0.5rem",
+                          backgroundColor: "#f6f6f7",
+                          borderRadius: "4px",
+                          fontSize: "12px",
+                          overflow: "auto",
+                        }}
+                      >
                         {errorDetails}
                       </pre>
                     </details>
