@@ -65,37 +65,30 @@ export default function Index() {
         } else {
           console.log(`Review modal not displayed. Reason: ${result.code}: ${result.message}`);
           // Zeige benutzerfreundliches Feedback basierend auf dem Code
-          switch (result.code) {
-            case 'already-reviewed':
-              setReviewMessage({ type: 'success', content: 'You have already reviewed this app. Thank you for your support!' });
-              setShowReviewButton(false);
-              break;
-            case 'cooldown-period':
-              setReviewMessage({ type: 'info', content: 'Review request available again in 60 days. Thank you for your patience!' });
-              setShowReviewButton(false);
-              break;
-            case 'annual-limit-reached':
-              setReviewMessage({ type: 'info', content: 'Review limit reached for this year. Thank you for your continued support!' });
-              setShowReviewButton(false);
-              break;
-            case 'recently-installed':
-              setReviewMessage({ type: 'warning', content: 'Please use the app for at least 24 hours before requesting a review.' });
-              break;
-            case 'mobile-app':
-              setReviewMessage({ type: 'warning', content: 'Review requests are not available on mobile devices. Please use a desktop browser.' });
-              setShowReviewButton(false);
-              break;
-            case 'merchant-ineligible':
-              setReviewMessage({ type: 'info', content: 'Review not available at this time. Thank you for your interest in Timedify!' });
-              setShowReviewButton(false);
-              break;
-            case 'already-open':
-            case 'open-in-progress':
-              setReviewMessage({ type: 'warning', content: 'Review modal is already open or opening. Please check your browser.' });
-              break;
-            case 'cancelled':
-              setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
-              break;
+          if (result.code === 'already-reviewed') {
+            setReviewMessage({ type: 'success', content: 'You have already reviewed this app. Thank you for your support!' });
+            setShowReviewButton(false);
+          } else if (result.code === 'cooldown-period') {
+            setReviewMessage({ type: 'info', content: 'Review request available again in 60 days. Thank you for your patience!' });
+            setShowReviewButton(false);
+          } else if (result.code === 'annual-limit-reached') {
+            setReviewMessage({ type: 'info', content: 'Review limit reached for this year. Thank you for your continued support!' });
+            setShowReviewButton(false);
+          } else if (result.code === 'recently-installed') {
+            setReviewMessage({ type: 'warning', content: 'Please use the app for at least 24 hours before requesting a review.' });
+          } else if (result.code === 'mobile-app') {
+            setReviewMessage({ type: 'warning', content: 'Review requests are not available on mobile devices. Please use a desktop browser.' });
+            setShowReviewButton(false);
+          } else if (result.code === 'merchant-ineligible') {
+            setReviewMessage({ type: 'info', content: 'Review not available at this time. Thank you for your interest in Timedify!' });
+            setShowReviewButton(false);
+          } else if (result.code === 'already-open' || result.code === 'open-in-progress') {
+            setReviewMessage({ type: 'warning', content: 'Review modal is already open or opening. Please check your browser.' });
+          } else if (result.code === 'cancelled') {
+            setReviewMessage({ type: 'info', content: 'Review request was cancelled. You can try again later.' });
+          } else {
+            // Compile-time exhaustive check: TypeScript error if new review codes are added
+            const _exhaustiveCheck: never = result.code;
           }
         }
       } else {
