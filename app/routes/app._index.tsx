@@ -74,11 +74,20 @@ export default function Index() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
   const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'info' | 'warning' | 'critical'; content: string } | null>(null);
+  const [pingError, setPingError] = useState<string | null>(null);
   const { authenticatedFetch } = useAuthenticatedFetch();
 
   useEffect(() => {
     // Kleiner Token-Ping, hilft dem BfS-Scanner beim Nachweis der Token-Nutzung
-    void authenticatedFetch({ endpoint: "/api/ping" }).catch(console.error);
+    void authenticatedFetch({ endpoint: "/api/ping" })
+      .then(() => {
+        // Clear any previous ping errors on success
+        setPingError(null);
+      })
+      .catch((error) => {
+        console.error('Token ping failed:', error);
+        setPingError('Failed to validate session token. Please refresh the page.');
+      });
     
     // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
     const timer = setTimeout(() => {
@@ -119,14 +128,11 @@ export default function Index() {
           console.log(`Review modal not displayed. Reason: ${result.code}: ${result.message}`);
           // Zeige benutzerfreundliches Feedback basierend auf dem Code
           const config = reviewCodeConfig[result.code];
-          if (config) {
-            setReviewMessage({ type: config.type, content: config.message });
-            if (config.hideButton) {
-              setShowReviewButton(false);
-            }
-          } else {
-            // Fallback für unbekannte Codes
-            setReviewMessage({ type: 'warning', content: `Unknown review result: ${result.code}` });
+          
+          // Apply configuration directly (config is guaranteed to exist due to type checking)
+          setReviewMessage({ type: config.type, content: config.message });
+          if (config.hideButton) {
+            setShowReviewButton(false);
           }
         }
       } else {
@@ -172,6 +178,20 @@ export default function Index() {
               action={{
                 content: 'Dismiss',
                 onAction: () => setReviewMessage(null),
+              }}
+            />
+          </Layout.Section>
+        )}
+
+        {/* Ping Error Banner */}
+        {pingError && (
+          <Layout.Section>
+            <Banner
+              title={pingError}
+              tone="critical"
+              action={{
+                content: 'Dismiss',
+                onAction: () => setPingError(null),
               }}
             />
           </Layout.Section>
