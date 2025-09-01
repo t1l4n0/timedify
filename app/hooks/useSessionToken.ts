@@ -20,7 +20,7 @@ export function useSessionToken(): SessionTokenData & {
       setError(null);
 
       // Prüfe ob App Bridge verfügbar ist
-      if (typeof window !== 'undefined' && window.ShopifyApp) {
+      if (typeof window !== 'undefined' && (window as any).ShopifyApp) {
         try {
           // Echten Session Token von Shopify App Bridge anfordern
           const response = await fetch('/api/session-token', {
@@ -30,7 +30,7 @@ export function useSessionToken(): SessionTokenData & {
             },
             body: JSON.stringify({
               action: 'getSessionToken',
-              shopifyApp: window.ShopifyApp
+              shopifyApp: (window as any).ShopifyApp
             })
           });
 

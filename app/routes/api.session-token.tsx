@@ -36,7 +36,7 @@ export async function action({ request }: LoaderFunctionArgs) {
       }
 
       // Session Token für die aktuelle Session generieren
-      const sessionToken = await admin.sessionToken.create({
+      const sessionToken = await (admin as any).sessionToken.create({
         isOnline: false,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 Stunden
       });
