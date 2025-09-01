@@ -91,12 +91,8 @@ export default function Index() {
         setPingError('Failed to validate session token. Please refresh the page.');
       });
 
-    // Zeige Review-Button nach 5 Sekunden (simuliert erfolgreichen Workflow)
-    const timer = setTimeout(() => {
-      setShowReviewButton(true);
-    }, 5000);
-
-    return () => clearTimeout(timer);
+    // Zeige Review-Button sofort (für bessere Benutzerfreundlichkeit)
+    setShowReviewButton(true);
   }, [authenticatedFetch, token, loading]);
 
   const videoId = 'Tvz61ykCn-I';
