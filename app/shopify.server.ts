@@ -4,36 +4,9 @@ import {
   AppDistribution,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
-
-// Einfache Memory-basierte Session-Speicherung
-class MemorySessionStorage {
-  private sessions = new Map();
-
-  async storeSession(session: any) {
-    this.sessions.set(session.id, session);
-    return Promise.resolve(true);
-  }
-
-  async loadSession(id: string) {
-    return Promise.resolve(this.sessions.get(id) || undefined);
-  }
-
-  async deleteSession(id: string) {
-    this.sessions.delete(id);
-    return Promise.resolve(true);
-  }
-
-  async deleteSessions(ids: string[]) {
-    ids.forEach(id => this.sessions.delete(id));
-    return Promise.resolve(true);
-  }
-
-  async findSessionsByShop(shop: string) {
-    const sessions = Array.from(this.sessions.values())
-      .filter((session: any) => session.shop === shop);
-    return Promise.resolve(sessions);
-  }
-}
+import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
+import { MemorySessionStorage } from "@shopify/shopify-app-session-storage-memory";
+import prisma from "./db.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -42,7 +15,10 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new MemorySessionStorage(),
+  // Use Prisma-backed sessions when a database is configured, otherwise fall back to memory.
+  sessionStorage: process.env.DATABASE_URL
+    ? new PrismaSessionStorage(prisma)
+    : new MemorySessionStorage(),
   distribution: AppDistribution.AppStore,
   future: {
     unstable_newEmbeddedAuthStrategy: true,

@@ -7,6 +7,7 @@
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "shopify": "shopify",
+    "test": "vitest",
     "extension:build": "shopify app build",
     "extension:dev": "shopify app dev",
     "extension:deploy": "shopify app deploy",
@@ -28,9 +29,11 @@
     "@remix-run/node": "^2.16.1",
     "@remix-run/react": "^2.16.1",
     "@remix-run/serve": "^2.16.1",
+    "@shopify/app-bridge": "^3.7.10",
     "@shopify/app-bridge-react": "^4.2.2",
     "@shopify/polaris": "^13.9.5",
     "@shopify/shopify-app-remix": "^3.8.5",
+    "@shopify/shopify-app-session-storage-memory": "^4.0.20",
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
     "isbot": "^5.1.0",
     "prisma": "^6.2.1",
@@ -40,10 +43,14 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^7.0.2",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "jsdom": "^26.1.0",
     "terser": "^5.43.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "vitest": "^1.6.0"
   },
   "sideEffects": false
 }

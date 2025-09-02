@@ -23,7 +23,6 @@
       
       return new Date(year, month, day, hour, minute, 0);
     } catch (e) {
-      console.warn('Failed to parse date:', value, e);
       return null;
     }
   }
@@ -40,22 +39,11 @@
       var endAt = endStr ? parseGermanDate(endStr) : null;
       var now = new Date();
       
-      // Debug logging
-      console.log('Timed Sections Debug:', {
-        startStr: startStr,
-        endStr: endStr,
-        startAt: startAt,
-        endAt: endAt,
-        now: now,
-        shouldShow: !(startAt && now < startAt) && !(endAt && now > endAt)
-      });
-      
-      if (startAt && now < startAt) return false; // Before start time
-      if (endAt && now > endAt) return false;     // After end time
+    if (startAt && now < startAt) return false; // Before start time
+    if (endAt && now > endAt) return false;     // After end time
       
       return true;
     } catch (e) {
-      console.error('Error computing active state:', e);
       return true; // Default to visible on error
     }
   }
@@ -63,7 +51,6 @@
   // Find the next end marker after a start block
   function findNextEndMarker(startEl) {
     var ends = document.querySelectorAll('.timed-sections-end');
-    console.log('Found end markers:', ends.length);
     
     for (var i = 0; i < ends.length; i++) {
       var endEl = ends[i];
@@ -72,11 +59,9 @@
       var pos = startEl.compareDocumentPosition(endEl);
       // Node.DOCUMENT_POSITION_FOLLOWING = 4
       if (pos & 4) {
-        console.log('Found next end marker:', endEl);
         return endEl;
       }
     }
-    console.log('No end marker found');
     return null;
   }
 
@@ -88,7 +73,6 @@
     
     // Method 1: Look for elements with data attributes that might be content
     var potentialContent = document.querySelectorAll('[data-section-id], [id^="shopify-section-"], .shopify-section, [class*="section"], [class*="block"]');
-    console.log('Found potential content elements:', potentialContent.length);
     
     for (var i = 0; i < potentialContent.length; i++) {
       var el = potentialContent[i];
@@ -100,7 +84,6 @@
       
       // Element should be after start (4) and before end (2)
       if ((startPos & 4) && (endPos & 2)) {
-        console.log('Found content element between start/end:', el, 'tagName:', el.tagName);
         result.push(el);
       }
     }
@@ -127,20 +110,16 @@
         var endPos = endEl.compareDocumentPosition(contentEl);
         
         if ((startPos & 4) && (endPos & 2)) {
-          console.log('Found content element with selector method:', contentEl, 'tagName:', contentEl.tagName);
           result.push(contentEl);
         }
       }
     }
-    
-    console.log('Total elements found with alternative method:', result.length);
     return result;
   }
 
   // Collect all elements between start and end blocks
   function collectRangeElements(startEl, endEl) {
     if (!endEl) {
-      console.log('No end element, cannot collect range');
       return [];
     }
     
@@ -155,19 +134,15 @@
           !cursor.classList.contains('ts-hidden') &&
           cursor !== startEl) {
         result.push(cursor);
-        console.log('Added element to range:', cursor);
       }
       cursor = cursor.nextElementSibling;
       count++;
     }
-    
-    console.log('Collected range elements:', result.length);
     return result;
   }
 
   // Apply visibility state to elements
   function applyState(elements, active) {
-    console.log('Applying state:', active ? 'visible' : 'hidden', 'to', elements.length, 'elements');
     
     for (var i = 0; i < elements.length; i++) {
       var el = elements[i];
@@ -180,67 +155,51 @@
           el.style.removeProperty('display');
           el.style.removeProperty('visibility');
           el.style.removeProperty('opacity');
-          console.log('Made element visible:', el);
         } else {
           el.classList.add('ts-hidden');
           el.classList.remove('ts-visible');
           el.style.setProperty('display', 'none', 'important');
           el.style.setProperty('visibility', 'hidden', 'important');
           el.style.setProperty('opacity', '0', 'important');
-          console.log('Made element hidden:', el);
         }
-      } catch (e) {
-        console.error('Error applying state to element:', e);
-      }
+        } catch (e) {
+          // Ignore errors while applying state
+        }
     }
   }
 
   // Control the range of content for a start block
   function controlRange(startEl) {
-    console.log('Controlling range for start element:', startEl);
     
     var endEl = findNextEndMarker(startEl);
     if (!endEl) {
-      console.log('No end marker found, cannot control range');
       return;
     }
     
     // Try original method first
     var controlled = collectRangeElements(startEl, endEl);
-    console.log('Elements found with original method:', controlled.length);
     
     // OPTIMIZED: Only try alternative method if no elements found AND we're in live mode
     if (controlled.length === 0 && (!window.Shopify || !window.Shopify.designMode)) {
-      console.log('No elements found with original method, trying alternative...');
       var alternativeElements = findElementsBetween(startEl, endEl);
       controlled = alternativeElements;
-      console.log('Elements found with alternative method:', controlled.length);
     }
     
-    var active = computeActive(startEl);
-    
-    console.log('Range control result:', {
-      controlledElements: controlled.length,
-      shouldBeActive: active
-    });
-    
-    applyState(controlled, active);
-  }
+      var active = computeActive(startEl);
+
+      applyState(controlled, active);
+    }
 
   // Main refresh function
   function refresh() {
-    console.log('Refreshing timed sections...');
     
     var starts = document.querySelectorAll('.timed-sections-start');
-    console.log('Found start blocks:', starts.length);
     
     if (!starts || !starts.length) {
-      console.log('No start blocks found');
       return;
     }
     
     starts.forEach(function(startEl, index) {
-      console.log('Processing start block', index + 1, ':', startEl);
       controlRange(startEl);
     });
   }
@@ -269,13 +228,10 @@
 
   // Initialize the system
   function init() {
-    console.log('Initializing timed sections...');
     
     var starts = document.querySelectorAll('.timed-sections-start');
-    console.log('Initial start blocks found:', starts.length);
     
     if (!starts || !starts.length) {
-      console.log('No start blocks found during init');
       return;
     }
     
@@ -287,12 +243,10 @@
     
     // FAST REFRESH: Check every 2 seconds for immediate response
     var interval = window.Shopify && window.Shopify.designMode ? 10000 : 2000; // 10s for editor, 2s for live
-    console.log('Setting refresh interval:', interval, 'ms');
     setInterval(run, interval);
     
     // Observe DOM changes in live mode only
     if (!window.Shopify || !window.Shopify.designMode) {
-      console.log('Setting up MutationObserver for live mode');
       var mo = new MutationObserver(run);
       mo.observe(document.body, { childList: true, subtree: true });
     }
@@ -300,14 +254,11 @@
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    console.log('DOM loading, waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOMContentLoaded fired, initializing...');
       init();
       setupThemeEditor();
     });
   } else {
-    console.log('DOM already ready, initializing immediately...');
     init();
     setupThemeEditor();
   }
