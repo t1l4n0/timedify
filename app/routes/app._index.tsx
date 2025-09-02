@@ -11,7 +11,7 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { useState, useEffect } from "react";
-import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
+
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import type { ReviewRequestResponse, ReviewResultCode } from "~/globals";
@@ -73,23 +73,11 @@ export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showReviewButton, setShowReviewButton] = useState(false);
-  const [pingError, setPingError] = useState<string | null>(null);
-  const authenticatedFetch = useAuthenticatedFetch();
 
   useEffect(() => {
-    authenticatedFetch({ endpoint: "/api/ping" })
-      .then(() => {
-        // Clear any previous ping errors on success
-        setPingError(null);
-      })
-      .catch((error) => {
-        console.error('Token ping failed:', error);
-        setPingError('Failed to validate session token. Please refresh the page.');
-      });
-
     // Zeige Review-Button sofort (für bessere Benutzerfreundlichkeit)
     setShowReviewButton(true);
-  }, [authenticatedFetch]);
+  }, []);
 
   const videoId = 'Tvz61ykCn-I';
   // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
@@ -161,19 +149,7 @@ export default function Index() {
 
 
 
-        {/* Ping Error Banner */}
-        {pingError && (
-          <Layout.Section>
-            <Banner
-              title={pingError}
-              tone="critical"
-              action={{
-                content: 'Dismiss',
-                onAction: () => setPingError(null),
-              }}
-            />
-          </Layout.Section>
-        )}
+
 
         
 

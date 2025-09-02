@@ -39,7 +39,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export type RootLoaderData = SerializeFrom<typeof loader>;
 
-function AppWithTranslations({ locale }: { locale: SupportedLocale }) {
+function AppWithTranslations({ locale, apiKey }: { locale: SupportedLocale; apiKey: string }) {
   const [_i18n, ShareTranslations] = useI18n({
     id: "app",
     translations: APP_LOCALES,
@@ -54,6 +54,19 @@ function AppWithTranslations({ locale }: { locale: SupportedLocale }) {
           <meta name="viewport" content="width=device-width,initial-scale=1" />
           <Meta />
           <Links />
+          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.Shopify = window.Shopify || {};
+                window.Shopify.config = {
+                  apiKey: '${apiKey}',
+                  shopOrigin: window.location.search.match(/shop=([^&]+)/)?.[1] || '',
+                  forceRedirect: true
+                };
+              `,
+            }}
+          />
         </head>
         <body>
           <Outlet />
@@ -66,7 +79,7 @@ function AppWithTranslations({ locale }: { locale: SupportedLocale }) {
 }
 
 export default function App() {
-  const { locale } = useLoaderData<typeof loader>();
+  const { locale, apiKey } = useLoaderData<typeof loader>();
   const manager = useMemo(
     () => new I18nManager({ locale, fallbackLocale: "en" }),
     [locale]
@@ -74,7 +87,7 @@ export default function App() {
 
   return (
     <I18nContext.Provider value={manager}>
-      <AppWithTranslations locale={locale} />
+      <AppWithTranslations locale={locale} apiKey={apiKey} />
     </I18nContext.Provider>
   );
 }

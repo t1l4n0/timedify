@@ -58,6 +58,7 @@ export default function AppLayout() {
       isEmbeddedApp 
       apiKey={apiKey} 
       i18n={polarisTranslations}
+      forceRedirect
     >
       <Outlet />
     </AppProvider>
@@ -89,6 +90,7 @@ export function ErrorBoundary() {
       isEmbeddedApp
       apiKey={rootData?.apiKey ?? ""}
       i18n={polarisTranslations}
+      forceRedirect
     >
       <Page title={i18n.translate("errorBoundary.title")}>
         <Layout>
