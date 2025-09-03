@@ -33,61 +33,7 @@
   text-align: right;
 }
 
-/* Countdown Styles */
-.countdown-container {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-}
-
-.countdown-wrapper {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.countdown-clock {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.countdown-unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 60px;
-}
-
-.countdown-value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: inherit;
-  line-height: 1;
-}
-
-.countdown-label {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 5px;
-  opacity: 0.8;
-}
-
-.countdown-simple {
-  text-align: center;
-}
-
-.countdown-text {
-  font-size: 1.125rem;
-  font-weight: 500;
-}
+/* Countdown functionality removed - now available in Countify app */
 
 /* Content Elements */
 .timed-content-inner {
@@ -191,47 +137,9 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .countdown-clock {
-    gap: 10px;
-  }
-  
-  .countdown-unit {
-    min-width: 50px;
-  }
-  
-  .countdown-value {
-    font-size: 1.5rem;
-  }
-  
-  .countdown-label {
-    font-size: 0.75rem;
-  }
-  
   .button {
     padding: 10px 20px;
     font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .countdown-wrapper {
-    gap: 15px;
-  }
-  
-  .countdown-clock {
-    gap: 8px;
-  }
-  
-  .countdown-unit {
-    min-width: 45px;
-  }
-  
-  .countdown-value {
-    font-size: 1.25rem;
-  }
-  
-  .countdown-label {
-    font-size: 0.7rem;
   }
 }
 
@@ -279,8 +187,7 @@
 
 /* Print Styles */
 @media print {
-  .timed-content.inactive,
-  .timed-content .countdown-container {
+  .timed-content.inactive {
     display: none;
   }
 

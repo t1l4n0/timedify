@@ -10,78 +10,15 @@ import {
   Modal,
   Banner,
 } from "@shopify/polaris";
-import { useState, useEffect } from "react";
-
+import { useState } from "react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
-import type { ReviewRequestResponse, ReviewResultCode } from "~/globals";
-
-// Configuration map for review result codes - hoisted to module scope for performance
-const reviewCodeConfig: Record<ReviewResultCode, {
-  message: string;
-  type: 'success' | 'info' | 'warning' | 'critical';
-  hideButton: boolean;
-}> = {
-  'already-reviewed': {
-    message: 'You have already reviewed this app. Thank you for your support!',
-    type: 'success',
-    hideButton: true
-  },
-  'cooldown-period': {
-    message: 'Review request available again in 60 days. Thank you for your patience!',
-    type: 'info',
-    hideButton: true
-  },
-  'annual-limit-reached': {
-    message: 'Review limit reached for this year. Thank you for your continued support!',
-    type: 'info',
-    hideButton: true
-  },
-  'recently-installed': {
-    message: 'Please use the app for at least 24 hours before requesting a review.',
-    type: 'warning',
-    hideButton: false
-  },
-  'mobile-app': {
-    message: 'Review requests are not available on mobile devices. Please use a desktop browser.',
-    type: 'warning',
-    hideButton: true
-  },
-  'merchant-ineligible': {
-    message: 'Review not available at this time. Thank you for your interest in Timedify!',
-    type: 'info',
-    hideButton: true
-  },
-  'already-open': {
-    message: 'Review modal is already open or opening. Please check your browser.',
-    type: 'warning',
-    hideButton: false
-  },
-  'open-in-progress': {
-    message: 'Review modal is already open or opening. Please check your browser.',
-    type: 'warning',
-    hideButton: false
-  },
-  'cancelled': {
-    message: 'Review request was cancelled. You can try again later.',
-    type: 'info',
-    hideButton: true
-  }
-};
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [showReviewButton, setShowReviewButton] = useState(false);
-
-  useEffect(() => {
-    // Zeige Review-Button sofort (für bessere Benutzerfreundlichkeit)
-    setShowReviewButton(true);
-  }, []);
 
   const videoId = 'Tvz61ykCn-I';
-  // LCP-optimiertes Thumbnail: mqdefault.jpg (320x180) statt maxresdefault.jpg (1280x720)
-  // Spart 94,9 KiB und verbessert LCP deutlich
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
   const goToAdmin = (adminPath: string) => {
@@ -93,35 +30,6 @@ export default function Index() {
       }
     } catch (_e) {}
     window.location.href = adminUrl;
-  };
-
-  const requestReview = async () => {
-    try {
-      // Verwende das globale shopify Objekt von App Bridge v4
-      if (typeof window !== 'undefined' && window.shopify && window.shopify.reviews) {
-        const result: ReviewRequestResponse = await window.shopify.reviews.request();
-        
-        if (result.success) {
-          console.log('Review modal displayed successfully');
-          // Verstecke den Button nach erfolgreicher Anzeige
-          setShowReviewButton(false);
-        } else {
-          console.log(`Review modal not displayed. Reason: ${result.code}: ${result.message}`);
-          // Zeige benutzerfreundliches Feedback basierend auf dem Code
-          const config = reviewCodeConfig[result.code];
-          
-          // Apply configuration directly (config is guaranteed to exist due to type checking)
-          if (config.hideButton) {
-            setShowReviewButton(false);
-          }
-        }
-      } else {
-        // Fallback falls App Bridge nicht verfügbar ist
-        setShowReviewButton(false);
-      }
-    } catch (error) {
-      console.error('Error requesting review:', error);
-    }
   };
 
   return (
@@ -147,14 +55,6 @@ export default function Index() {
           </Banner>
         </Layout.Section>
 
-
-
-
-
-        
-
-        
-
         <Layout.Section>
           <MediaCard
             title="Timedify – How it works"
@@ -168,8 +68,6 @@ export default function Index() {
             />
           </MediaCard>
         </Layout.Section>
-
-        
 
         <Layout.Section>
           <Card>
@@ -214,33 +112,35 @@ export default function Index() {
           </Card>
         </Layout.Section>
 
-        {/* Review Request Section - immer sichtbar */}
-        {true && (
-          <Layout.Section>
-            <Card>
-              <div style={{ padding: "1rem", textAlign: "center" }}>
-                <Text as="h3" variant="headingMd">Enjoying Timedify?</Text>
-                <div style={{ marginBottom: "1rem" }}>
-                  <Text as="p" variant="bodyMd">
-                    If Timedify is helping you manage your time-controlled content, please consider leaving a review!
-                  </Text>
-                </div>
-                <Button 
-                  variant="primary" 
-                  onClick={requestReview}
-                  tone="success"
-                >
-                  ⭐ Leave a Review
-                </Button>
-                <div style={{ marginTop: "0.5rem", color: "#6d7175" }}>
-                  <Text as="p" variant="bodySm">
-                    Your feedback helps other merchants discover Timedify
-                  </Text>
-                </div>
+        {/* Review Section */}
+        <Layout.Section>
+          <Card>
+            <div style={{ padding: "1rem", textAlign: "center" }}>
+              <Text as="h3" variant="headingMd">Enjoying Timedify?</Text>
+              <div style={{ marginBottom: "1rem" }}>
+                <Text as="p" variant="bodyMd">
+                  If Timedify helps you manage time‑controlled content, please consider leaving a review!
+                </Text>
               </div>
-            </Card>
-          </Layout.Section>
-        )}
+              <Button
+                variant="primary"
+                tone="success"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).shopify?.reviews?.request) {
+                    (window as any).shopify.reviews.request().catch(() => {});
+                  }
+                }}
+              >
+                ⭐ Leave a Review
+              </Button>
+              <div style={{ marginTop: "0.5rem", color: "#6d7175" }}>
+                <Text as="p" variant="bodySm">
+                  Your feedback helps other merchants discover Timedify
+                </Text>
+              </div>
+            </div>
+          </Card>
+        </Layout.Section>
       </Layout>
 
       <Modal

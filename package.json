@@ -1,5 +1,5 @@
 {
-  "name": "timedify",
+  "name": "countify",
   "private": true,
   "scripts": {
     "build": "remix vite:build",

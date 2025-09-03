@@ -8,7 +8,6 @@
       this.block = block;
     this.settings = this.parseSettings();
     this.isActive = false;
-      this.countdownInterval = null;
 
     this.init();
   }
@@ -25,7 +24,6 @@
   init() {
     this.checkTimeStatus();
     this.setupTimeCheck();
-    this.setupCountdown();
   }
 
   checkTimeStatus() {
@@ -65,58 +63,7 @@
     }, 60000);
   }
 
-  setupCountdown() {
-    if (!this.settings.show_countdown) return;
-
-    const countdownContainer = this.block.querySelector('.countdown-container');
-    if (!countdownContainer) return;
-
-    countdownContainer.style.display = 'flex';
-
-    this.updateCountdown();
-    this.countdownInterval = setInterval(() => {
-      this.updateCountdown();
-    }, 1000);
-  }
-
-  updateCountdown() {
-    const now = new Date();
-    const endTime = this.settings.end_datetime ? new Date(this.settings.end_datetime) : null;
-
-    if (!endTime || now >= endTime) {
-      this.stopCountdown();
-      return;
-    }
-
-    const timeLeft = endTime - now;
-    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-    // Update countdown display
-    const daysElement = this.block.querySelector('#days-' + this.block.id);
-    const hoursElement = this.block.querySelector('#hours-' + this.block.id);
-    const minutesElement = this.block.querySelector('#minutes-' + this.block.id);
-    const secondsElement = this.block.querySelector('#seconds-' + this.block.id);
-
-    if (daysElement) daysElement.textContent = days;
-    if (hoursElement) hoursElement.textContent = hours;
-    if (minutesElement) minutesElement.textContent = minutes;
-    if (secondsElement) secondsElement.textContent = seconds;
-  }
-
-  stopCountdown() {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
-    }
-
-    const countdownContainer = this.block.querySelector('.countdown-container');
-    if (countdownContainer) {
-      countdownContainer.style.display = 'none';
-    }
-  }
+  // Countdown functionality removed - now available in Countify app
 }
 
 // Initialize all timed content blocks
