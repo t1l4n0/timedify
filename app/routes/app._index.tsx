@@ -34,10 +34,11 @@ export default function Index() {
         
         // URL komplett neu konstruieren
         const u = new URL(`https://${shop}/admin/themes/current/editor`);
-        u.searchParams.set('template', templateParam);
-        u.searchParams.set('addAppBlockId', `${apiKey}/${addAppBlockId}`);
-        u.searchParams.set('target', targetParam);
-        
+        const blockIdParam = `${encodeURIComponent(apiKey)}/${encodeURIComponent(addAppBlockId)}`;
+        u.search =
+          `template=${encodeURIComponent(templateParam)}` +
+          `&addAppBlockId=${blockIdParam}` +
+          `&target=${encodeURIComponent(targetParam)}`;
         adminUrl = u.toString();
       } else {
         adminUrl = `https://${shop}/admin/themes/current/editor`;
