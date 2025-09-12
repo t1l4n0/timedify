@@ -21,8 +21,28 @@ export default function Index() {
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = (adminPath: string) => {
-    const adminUrl = `https://${shop}/admin${adminPath}`;
+  const goToAdmin = (adminPath: string, addAppBlockId?: string) => {
+    // Extrahiere Store-Handle aus der Shop-Domain
+    const storeHandle = shop.replace('.myshopify.com', '');
+    const apiKey = 'e6e56f8533bfb028465f4cc4dfda86f9';
+    
+    let adminUrl: string;
+    
+    if (adminPath === '/themes/current/editor') {
+      // Theme Editor mit korrekter URL-Struktur
+      if (addAppBlockId) {
+        adminUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?template=product&addAppBlockId=${apiKey}/${addAppBlockId}&target=newAppsSection`;
+      } else {
+        adminUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor`;
+      }
+    } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
+      // Korrekte Billing-URL
+      adminUrl = `https://admin.shopify.com/store/${storeHandle}/settings/billing/apps/timed-content-app`;
+    } else {
+      // Fallback für andere Admin-Pfade
+      adminUrl = `https://admin.shopify.com/store/${storeHandle}${adminPath}`;
+    }
+    
     try {
       if (window.top) {
         window.top.location.href = adminUrl;
@@ -41,7 +61,7 @@ export default function Index() {
             tone={hasActiveSub ? 'success' : 'warning'}
             action={hasActiveSub ? {
               content: '🎨 Go to Theme Editor',
-              onAction: () => goToAdmin('/themes/current/editor'),
+              onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start'),
             } : {
               content: '📋 View Plans',
               onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans'),
@@ -103,9 +123,18 @@ export default function Index() {
                 <li><Text as="span" variant="bodyMd"><strong>Configure timing:</strong> Set start and end date/time in the Start block settings.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Save & test:</strong> Save and test on your storefront.</Text></li>
               </ol>
-              <div style={{ marginTop: '1rem' }}>
-                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor')}>
+              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start')}>
                   🎨 Go to Theme Editor
+                </Button>
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start')}>
+                  ⏰ Add Start Block
+                </Button>
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'b-timed-end')}>
+                  🛑 Add End Block
+                </Button>
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'countify-countdown')}>
+                  ⏱️ Add Countdown
                 </Button>
               </div>
             </div>
