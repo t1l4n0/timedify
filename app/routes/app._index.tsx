@@ -11,12 +11,15 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { useState } from "react";
+import { Redirect } from "@shopify/app-bridge/actions";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const app = useAppBridge();
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -54,14 +57,22 @@ export default function Index() {
       adminUrl = u.toString();
     }
     
-    // Top-Level-Redirect um Query-Parameter zu erhalten
+    // Verwende App Bridge Redirect.Action.REMOTE für korrekte myshopify.com Navigation
     try {
-      if (window.top) {
-        window.top.location.href = adminUrl;
-        return;
+      if (app) {
+        const redirect = Redirect.create(app as any);
+        redirect.dispatch(Redirect.Action.REMOTE, { 
+          url: adminUrl, 
+          newContext: true 
+        });
+      } else {
+        // Fallback für den Fall, dass App Bridge nicht verfügbar ist
+        window.open(adminUrl, '_blank');
       }
-    } catch (_e) {}
-    window.location.href = adminUrl;
+    } catch (error) {
+      // Fallback für den Fall, dass App Bridge nicht verfügbar ist
+      window.open(adminUrl, '_blank');
+    }
   };
 
   return (
