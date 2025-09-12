@@ -44,8 +44,8 @@ export default function Index() {
         adminUrl = `https://${shop}/admin/themes/current/editor`;
       }
     } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
-      // Billing-URL - auch hier URL neu aufbauen
-      const u = new URL(`https://${shop}/admin/settings/billing/apps/timed-content-app`);
+      // Managed Pricing URL - korrekte Billing-Seite
+      const u = new URL(`https://${shop}/admin/charges/timed-content-app/pricing_plans`);
       adminUrl = u.toString();
     } else {
       // Fallback für andere Admin-Pfade
