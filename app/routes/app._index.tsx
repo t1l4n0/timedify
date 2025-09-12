@@ -21,28 +21,38 @@ export default function Index() {
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = (adminPath: string, addAppBlockId?: string) => {
-    // Extrahiere Store-Handle aus der Shop-Domain
-    const storeHandle = shop.replace('.myshopify.com', '');
+  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string) => {
     const apiKey = 'e6e56f8533bfb028465f4cc4dfda86f9';
     
     let adminUrl: string;
     
     if (adminPath === '/themes/current/editor') {
-      // Theme Editor mit korrekter URL-Struktur
+      // Theme Editor - URL komplett neu aufbauen ohne eingehende Query-Parameter
       if (addAppBlockId) {
-        adminUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?template=product&addAppBlockId=${apiKey}/${addAppBlockId}&target=newAppsSection`;
+        const targetParam = target || 'newAppsSection';
+        const templateParam = target === 'mainSection' ? 'product' : 'index';
+        
+        // URL komplett neu konstruieren
+        const u = new URL(`https://${shop}/admin/themes/current/editor`);
+        u.searchParams.set('template', templateParam);
+        u.searchParams.set('addAppBlockId', `${apiKey}/${addAppBlockId}`);
+        u.searchParams.set('target', targetParam);
+        
+        adminUrl = u.toString();
       } else {
-        adminUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor`;
+        adminUrl = `https://${shop}/admin/themes/current/editor`;
       }
     } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
-      // Korrekte Billing-URL
-      adminUrl = `https://admin.shopify.com/store/${storeHandle}/settings/billing/apps/timed-content-app`;
+      // Billing-URL - auch hier URL neu aufbauen
+      const u = new URL(`https://${shop}/admin/settings/billing/apps/timed-content-app`);
+      adminUrl = u.toString();
     } else {
       // Fallback für andere Admin-Pfade
-      adminUrl = `https://admin.shopify.com/store/${storeHandle}${adminPath}`;
+      const u = new URL(`https://${shop}/admin${adminPath}`);
+      adminUrl = u.toString();
     }
     
+    // Top-Level-Redirect um Query-Parameter zu erhalten
     try {
       if (window.top) {
         window.top.location.href = adminUrl;
@@ -61,7 +71,7 @@ export default function Index() {
             tone={hasActiveSub ? 'success' : 'warning'}
             action={hasActiveSub ? {
               content: '🎨 Go to Theme Editor',
-              onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start'),
+              onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection'),
             } : {
               content: '📋 View Plans',
               onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans'),
@@ -124,17 +134,17 @@ export default function Index() {
                 <li><Text as="span" variant="bodyMd"><strong>Save & test:</strong> Save and test on your storefront.</Text></li>
               </ol>
               <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start')}>
+                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection')}>
                   🎨 Go to Theme Editor
                 </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start')}>
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection')}>
                   ⏰ Add Start Block
                 </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'b-timed-end')}>
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'b-timed-end', 'newAppsSection')}>
                   🛑 Add End Block
                 </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'countify-countdown')}>
-                  ⏱️ Add Countdown
+                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'countify-countdown', 'mainSection')}>
+                  ⏱️ Add Countdown (Product)
                 </Button>
               </div>
             </div>
