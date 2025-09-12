@@ -33,12 +33,12 @@ export default function Index() {
         const templateParam = target === 'mainSection' ? 'product' : 'index';
         
         // Direkt zum Theme Editor des aktiven Themes mit App-Block
+        // Verwende myshopify.com Domain und /current/editor für Deep-Links
         const u = new URL(`https://${shop}/admin/themes/current/editor`);
-        const blockIdParam = `${encodeURIComponent(apiKey)}/${encodeURIComponent(addAppBlockId)}`;
-        u.search =
-          `template=${encodeURIComponent(templateParam)}` +
-          `&addAppBlockId=${blockIdParam}` +
-          `&target=${encodeURIComponent(targetParam)}`;
+        const blockIdParam = `${apiKey}/${addAppBlockId}`;
+        u.searchParams.set('template', templateParam);
+        u.searchParams.set('addAppBlockId', blockIdParam);
+        u.searchParams.set('target', targetParam);
         adminUrl = u.toString();
       } else {
         // Einfach zum Theme Editor des aktiven Themes
