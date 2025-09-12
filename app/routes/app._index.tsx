@@ -27,13 +27,13 @@ export default function Index() {
     let adminUrl: string;
     
     if (adminPath === '/themes/current/editor') {
-      // Theme Editor - URL komplett neu aufbauen ohne eingehende Query-Parameter
+      // Theme Editor - direkt zum aktiven Theme Editor
       if (addAppBlockId) {
         const targetParam = target || 'newAppsSection';
         const templateParam = target === 'mainSection' ? 'product' : 'index';
         
-        // URL komplett neu konstruieren - ohne /current/ um Theme-Probleme zu vermeiden
-        const u = new URL(`https://${shop}/admin/themes`);
+        // Direkt zum Theme Editor des aktiven Themes mit App-Block
+        const u = new URL(`https://${shop}/admin/themes/current/editor`);
         const blockIdParam = `${encodeURIComponent(apiKey)}/${encodeURIComponent(addAppBlockId)}`;
         u.search =
           `template=${encodeURIComponent(templateParam)}` +
@@ -41,8 +41,8 @@ export default function Index() {
           `&target=${encodeURIComponent(targetParam)}`;
         adminUrl = u.toString();
       } else {
-        // Einfach zur Theme-Übersicht ohne spezifisches Theme
-        adminUrl = `https://${shop}/admin/themes`;
+        // Einfach zum Theme Editor des aktiven Themes
+        adminUrl = `https://${shop}/admin/themes/current/editor`;
       }
     } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
       // Managed Pricing URL - korrekte Billing-Seite
