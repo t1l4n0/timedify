@@ -134,18 +134,9 @@ export default function Index() {
                 <li><Text as="span" variant="bodyMd"><strong>Configure timing:</strong> Set start and end date/time in the Start block settings.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Save & test:</strong> Save and test on your storefront.</Text></li>
               </ol>
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ marginTop: '1rem' }}>
                 <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection')}>
                   🎨 Go to Theme Editor
-                </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection')}>
-                  ⏰ Add Start Block
-                </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'b-timed-end', 'newAppsSection')}>
-                  🛑 Add End Block
-                </Button>
-                <Button variant="secondary" onClick={() => goToAdmin('/themes/current/editor', 'countify-countdown', 'mainSection')}>
-                  ⏱️ Add Countdown (Product)
                 </Button>
               </div>
             </div>
