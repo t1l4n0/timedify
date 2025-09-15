@@ -9,9 +9,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     throw new Response();
   }
 
-  console.log(`🏪 Shop Redact Webhook empfangen für Shop: ${shop}`);
-  console.log("Payload:", JSON.stringify(payload, null, 2));
-
   // Hier würde normalerweise die Shop-Datenlöschung implementiert werden
   // Für Compliance-Zwecke loggen wir nur die Anfrage
   
