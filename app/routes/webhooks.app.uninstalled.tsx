@@ -4,32 +4,34 @@ import { ActionFunctionArgs } from "@remix-run/node";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
-    const { topic, shop } = await authenticate.webhook(request);
+    const { topic, shop, payload } = await authenticate.webhook(request);
 
-    if (!topic) {
-      return new Response("Missing topic", { status: 400 });
+    if (!shop) {
+      console.error("App/uninstalled webhook: Missing shop parameter");
+      return new Response("Missing shop parameter", { status: 400 });
     }
 
-    if (topic === "APP_UNINSTALLED") {
-      const payload = await request.json();
-      console.log("App uninstalled:", payload);
+    console.log(`App/uninstalled webhook received for shop: ${shop}`);
 
-      try {
-        await prisma.$transaction([
-          prisma.session.deleteMany({ where: { shop } }),
-          // Add additional deleteMany calls here for other shop-specific models
-        ]);
-      } catch (error) {
-        console.error("Error during DB cleanup:", error);
-        return new Response("Error processing webhook", { status: 500 });
-      }
+    // App-Datenlöschung implementieren
+    try {
+      await prisma.$transaction([
+        // Alle Sessions für diesen Shop löschen
+        prisma.session.deleteMany({ where: { shop } }),
+        // Hier können weitere app-spezifische Daten gelöscht werden
+        // z.B. Metafields, App-spezifische Daten, etc.
+      ]);
 
-      return new Response("OK", { status: 200 });
+      console.log(`Successfully cleaned up app data for shop: ${shop}`);
+    } catch (error) {
+      console.error("Error during app data cleanup:", error);
+      // Auch bei DB-Fehlern 200 zurückgeben, um Webhook-Retry zu vermeiden
     }
 
-    return new Response("Unhandled webhook topic", { status: 400 });
+    return new Response("OK", { status: 200 });
   } catch (error) {
-    console.error("Error authenticating webhook:", error);
-    return new Response("Error processing webhook", { status: 500 });
+    console.error("Error processing app/uninstalled webhook:", error);
+    // 200 zurückgeben, um Webhook-Retry zu vermeiden
+    return new Response("OK", { status: 200 });
   }
 };
