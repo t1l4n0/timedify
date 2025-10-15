@@ -9,7 +9,7 @@
     "shopify": "shopify",
     "extension:build": "shopify app build",
     "extension:dev": "shopify app dev",
-    "extension:deploy": "shopify app deploy",
+    "extension:deploy": "shopify app deploy --force",
     "extension:info": "shopify app info",
     "build:all": "npm run build && npm run extension:build",
     "deploy:all": "npm run extension:deploy",
