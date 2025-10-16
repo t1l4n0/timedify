@@ -9,7 +9,7 @@
  * - Dead-Letter-Queue
  */
 
-import { shopify } from "~/shopify.server";
+import shopify from "~/shopify.server";
 import prisma from "~/db.server";
 
 // ============================================================================
