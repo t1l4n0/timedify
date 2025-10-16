@@ -24,7 +24,7 @@ export default function Index() {
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string) => {
+  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string, newContext: boolean = true) => {
     const apiKey = 'e6e56f8533bfb028465f4cc4dfda86f9';
     
     let adminUrl: string;
@@ -63,15 +63,23 @@ export default function Index() {
         const redirect = Redirect.create(app as any);
         redirect.dispatch(Redirect.Action.REMOTE, { 
           url: adminUrl, 
-          newContext: true 
+          newContext: newContext 
         });
       } else {
         // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-        window.open(adminUrl, '_blank');
+        if (newContext) {
+          window.open(adminUrl, '_blank');
+        } else {
+          window.location.href = adminUrl;
+        }
       }
     } catch (error) {
       // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-      window.open(adminUrl, '_blank');
+      if (newContext) {
+        window.open(adminUrl, '_blank');
+      } else {
+        window.location.href = adminUrl;
+      }
     }
   };
 
@@ -87,7 +95,7 @@ export default function Index() {
               onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection'),
             } : {
               content: '📋 View Plans',
-              onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans'),
+              onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans', undefined, undefined, false),
             }}
           >
             <p>
