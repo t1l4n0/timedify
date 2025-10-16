@@ -31,13 +31,15 @@ export default function Index() {
     
     if (adminPath === '/themes/current/editor') {
       // Theme Editor - direkt zum aktiven Theme Editor
+      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
+      
       if (addAppBlockId) {
         const targetParam = target || 'newAppsSection';
         const templateParam = target === 'mainSection' ? 'product' : 'index';
         
         // Direkt zum Theme Editor des aktiven Themes mit App-Block
         // Verwende myshopify.com Domain und /current/editor für Deep-Links
-        const u = new URL(`https://${shop}/admin/themes/current/editor`);
+        const u = new URL(`https://${shopDomain}/admin/themes/current/editor`);
         const blockIdParam = `${apiKey}/${addAppBlockId}`;
         u.searchParams.set('template', templateParam);
         u.searchParams.set('addAppBlockId', blockIdParam);
@@ -45,15 +47,18 @@ export default function Index() {
         adminUrl = u.toString();
       } else {
         // Einfach zum Theme Editor des aktiven Themes
-        adminUrl = `https://${shop}/admin/themes/current/editor`;
+        adminUrl = `https://${shopDomain}/admin/themes/current/editor`;
       }
     } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
       // Managed Pricing URL - korrekte Billing-Seite
-      const u = new URL(`https://${shop}/admin/charges/timed-content-app/pricing_plans`);
+      // Verwende die korrekte myshopify.com Domain
+      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
+      const u = new URL(`https://${shopDomain}/admin/charges/timed-content-app/pricing_plans`);
       adminUrl = u.toString();
     } else {
       // Fallback für andere Admin-Pfade
-      const u = new URL(`https://${shop}/admin${adminPath}`);
+      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
+      const u = new URL(`https://${shopDomain}/admin${adminPath}`);
       adminUrl = u.toString();
     }
     
