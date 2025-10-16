@@ -62,29 +62,11 @@ export default function Index() {
       adminUrl = u.toString();
     }
     
-    // Verwende App Bridge Redirect.Action.REMOTE für korrekte myshopify.com Navigation
-    try {
-      if (app) {
-        const redirect = Redirect.create(app as any);
-        redirect.dispatch(Redirect.Action.REMOTE, { 
-          url: adminUrl, 
-          newContext: newContext 
-        });
-      } else {
-        // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-        if (newContext) {
-          window.open(adminUrl, '_blank');
-        } else {
-          window.location.href = adminUrl;
-        }
-      }
-    } catch (error) {
-      // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-      if (newContext) {
-        window.open(adminUrl, '_blank');
-      } else {
-        window.location.href = adminUrl;
-      }
+    // Verwende direkte Navigation für bessere Kompatibilität
+    if (newContext) {
+      window.open(adminUrl, '_blank');
+    } else {
+      window.location.href = adminUrl;
     }
   };
 
