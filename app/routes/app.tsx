@@ -1,6 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useRouteError, isRouteErrorResponse, useRouteLoaderData } from "@remix-run/react";
-import { AppProvider } from "@shopify/shopify-app-remix/react";
+import { AppProvider as PolarisProvider } from "@shopify/polaris";
 import { authenticate } from "~/shopify.server";
 import type { SerializeFrom } from "@remix-run/node";
 import { Page, Layout, Card, Text, Banner } from "@shopify/polaris";
@@ -51,17 +51,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export type AppLoaderData = SerializeFrom<typeof loader>;
 
 export default function AppLayout() {
-  const { apiKey, polarisTranslations } = useLoaderData<typeof loader>();
+  const { polarisTranslations } = useLoaderData<typeof loader>();
   
   return (
-    <AppProvider 
-      isEmbeddedApp 
-      apiKey={apiKey} 
-      i18n={polarisTranslations}
-      forceRedirect
-    >
+    <PolarisProvider i18n={polarisTranslations}>
       <Outlet />
-    </AppProvider>
+    </PolarisProvider>
   );
 }
 
@@ -86,12 +81,7 @@ export function ErrorBoundary() {
   }
 
   return (
-    <AppProvider
-      isEmbeddedApp
-      apiKey={rootData?.apiKey ?? ""}
-      i18n={polarisTranslations}
-      forceRedirect
-    >
+    <PolarisProvider i18n={polarisTranslations}>
       <Page title={i18n.translate("errorBoundary.title")}>
         <Layout>
           <Layout.Section>
@@ -135,6 +125,6 @@ export function ErrorBoundary() {
           </Layout.Section>
         </Layout>
       </Page>
-    </AppProvider>
+    </PolarisProvider>
   );
 }

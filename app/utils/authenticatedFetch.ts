@@ -1,7 +1,4 @@
 import { useAppBridge } from "@shopify/app-bridge-react";
-import type { ClientApplication } from "@shopify/app-bridge";
-import { getSessionToken } from "@shopify/app-bridge/utilities";
-import { useEffect, useState } from "react";
 
 export interface AuthenticatedFetchOptions extends RequestInit {
   endpoint: string;
@@ -9,35 +6,21 @@ export interface AuthenticatedFetchOptions extends RequestInit {
   body?: any;
 }
 
+/**
+ * Hook für authentifizierte Fetch-Requests mit Session-Token aus App Bridge v4.
+ * Verwendet automatisch das Bearer-Token für alle API-Calls.
+ */
 export function useAuthenticatedFetch() {
-  const app = useAppBridge();
-  const [isAppBridgeReady, setIsAppBridgeReady] = useState(false);
+  const shopify = useAppBridge();
 
-  useEffect(() => {
-    // Warte bis App Bridge vollständig geladen ist
-    const checkAppBridge = () => {
-      if (app && typeof app === 'object' && 'subscribe' in app) {
-        setIsAppBridgeReady(true);
-      } else {
-        setTimeout(checkAppBridge, 100);
-      }
-    };
-    
-    checkAppBridge();
-  }, [app]);
-
-  return async function authenticatedFetch({
+  return async ({
     endpoint,
     method = "GET",
     body,
     ...fetchOptions
-  }: AuthenticatedFetchOptions) {
-    // Warte bis App Bridge bereit ist
-    if (!isAppBridgeReady) {
-      throw new Error("App Bridge is not ready yet");
-    }
-
-    const token = await getSessionToken(app as unknown as ClientApplication<any>);
+  }: AuthenticatedFetchOptions) => {
+    // Session-Token von App Bridge v4 holen
+    const token = await shopify.idToken();
 
     const headers: HeadersInit = {
       "Content-Type": "application/json",

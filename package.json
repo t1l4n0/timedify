@@ -1,56 +1,52 @@
 {
-  "name": "countify",
+  "name": "timedify",
   "private": true,
+  "sideEffects": false,
+  "type": "module",
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
-    "shopify": "shopify",
-    "extension:build": "shopify app build",
-    "extension:dev": "shopify app dev",
-    "extension:deploy": "shopify app deploy",
-    "extension:info": "shopify app info",
-    "build:all": "npm run build && npm run extension:build",
-    "deploy:all": "npm run extension:deploy",
-    "test": "vitest"
+    "test": "vitest",
+    "test:webhooks": "tsx scripts/test-webhooks.ts",
+    "test:synthetic": "./scripts/synthetic-webhook-test.sh",
+    "test:dev-smoke": "./scripts/dev-smoke-test.sh",
+    "health-check": "./scripts/health-check.sh",
+    "alerting-check": "./scripts/alerting-check.sh",
+    "retention-cleanup": "./scripts/retention-cleanup.sh",
+    "logs-watch": "./scripts/logs-watch.sh 30",
+    "post-deploy-smoke": "./scripts/post-deploy-smoke.sh",
+    "ops-dashboard": "./scripts/ops-dashboard.sh"
   },
-  "type": "module",
-  "engines": {
-    "node": "^18.20 || ^20.10 || >=21.0.0"
-  },
-  "workspaces": [
-    "extensions/*"
-  ],
   "dependencies": {
-    "@prisma/client": "^6.2.1",
-    "@remix-run/dev": "^2.16.1",
-    "@remix-run/fs-routes": "^2.16.1",
-    "@remix-run/node": "^2.16.1",
-    "@remix-run/react": "^2.16.1",
-    "@remix-run/serve": "^2.16.1",
+    "@prisma/client": "^6.17.1",
+    "@remix-run/node": "^2.13.1",
+    "@remix-run/react": "^2.13.1",
+    "@remix-run/serve": "^2.13.1",
     "@shopify/app-bridge": "^3.7.10",
-    "@shopify/app-bridge-react": "^4.2.2",
+    "@shopify/app-bridge-react": "^4.2.7",
     "@shopify/polaris": "^13.9.5",
+    "@shopify/polaris-icons": "^9.3.1",
     "@shopify/react-i18n": "^7.14.0",
-    "@shopify/shopify-app-remix": "^3.8.5",
-    "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
-    "isbot": "^5.1.0",
-    "prisma": "^6.2.1",
+    "@shopify/shopify-app-remix": "^2.4.0",
+    "isbot": "^4.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vite-tsconfig-paths": "^5.0.1"
+    "remix-utils": "^7.0.0"
   },
   "devDependencies": {
-    "@fullhuman/postcss-purgecss": "^7.0.2",
-    "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
-    "jsdom": "^26.1.0",
-    "terser": "^5.43.1",
-    "typescript": "^5.1.3",
+    "@remix-run/dev": "^2.13.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "prisma": "^6.17.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.0.0",
+    "vite": "^5.4.20",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "sideEffects": false
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

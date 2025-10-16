@@ -4,7 +4,7 @@ import {
   AppDistribution,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
-import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
+// Session storage wird direkt über Prisma implementiert
 import prisma from "./db.server";
 
 const shopify = shopifyApp({
@@ -14,7 +14,109 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(prisma),
+  sessionStorage: {
+    async storeSession(session) {
+      await prisma.session.upsert({
+        where: { id: session.id },
+        update: {
+          shop: session.shop,
+          state: session.state,
+          isOnline: session.isOnline,
+          scope: session.scope,
+          expires: session.expires,
+          accessToken: session.accessToken,
+          userId: session.userId,
+          firstName: session.firstName,
+          lastName: session.lastName,
+          email: session.email,
+          accountOwner: session.accountOwner,
+          locale: session.locale,
+          collaborator: session.collaborator,
+          emailVerified: session.emailVerified,
+        },
+        create: {
+          id: session.id,
+          shop: session.shop,
+          state: session.state,
+          isOnline: session.isOnline,
+          scope: session.scope,
+          expires: session.expires,
+          accessToken: session.accessToken,
+          userId: session.userId,
+          firstName: session.firstName,
+          lastName: session.lastName,
+          email: session.email,
+          accountOwner: session.accountOwner,
+          locale: session.locale,
+          collaborator: session.collaborator,
+          emailVerified: session.emailVerified,
+        },
+      });
+    },
+    async loadSession(id) {
+      const session = await prisma.session.findUnique({
+        where: { id },
+      });
+      if (!session) return undefined;
+      return {
+        id: session.id,
+        shop: session.shop,
+        state: session.state,
+        isOnline: session.isOnline,
+        scope: session.scope,
+        expires: session.expires,
+        accessToken: session.accessToken,
+        userId: session.userId,
+        firstName: session.firstName,
+        lastName: session.lastName,
+        email: session.email,
+        accountOwner: session.accountOwner,
+        locale: session.locale,
+        collaborator: session.collaborator,
+        emailVerified: session.emailVerified,
+        isExpired: () => {
+          if (!session.expires) return false;
+          return new Date(session.expires) < new Date();
+        },
+      };
+    },
+    async deleteSession(id) {
+      await prisma.session.delete({
+        where: { id },
+      });
+    },
+    async deleteSessions(ids) {
+      await prisma.session.deleteMany({
+        where: { id: { in: ids } },
+      });
+    },
+    async findSessionsByShop(shop) {
+      const sessions = await prisma.session.findMany({
+        where: { shop },
+      });
+      return sessions.map(session => ({
+        id: session.id,
+        shop: session.shop,
+        state: session.state,
+        isOnline: session.isOnline,
+        scope: session.scope,
+        expires: session.expires,
+        accessToken: session.accessToken,
+        userId: session.userId,
+        firstName: session.firstName,
+        lastName: session.lastName,
+        email: session.email,
+        accountOwner: session.accountOwner,
+        locale: session.locale,
+        collaborator: session.collaborator,
+        emailVerified: session.emailVerified,
+        isExpired: () => {
+          if (!session.expires) return false;
+          return new Date(session.expires) < new Date();
+        },
+      }));
+    },
+  },
   distribution: AppDistribution.AppStore,
   future: {
     unstable_newEmbeddedAuthStrategy: true,

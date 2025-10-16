@@ -8,36 +8,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const hmac = request.headers.get("X-Shopify-Hmac-Sha256");
 
     if (hmac) {
-      const { topic, shop, payload } = await authenticate.webhook(request);
+      const { topic, shop, payload, session } = await authenticate.webhook(request);
 
-      if (topic?.toUpperCase() !== "APP/UNINSTALLED") {
-        console.warn(`Unexpected topic at /webhooks/app/uninstalled: ${topic}`);
+      if (topic?.toUpperCase() !== "APP/SCOPES_UPDATE") {
+        console.warn(`Unexpected topic at /app/webhooks/app/scopes_update: ${topic}`);
       }
 
-      if (shop) {
-        console.log(`APP/UNINSTALLED: queuing cleanup for ${shop}`);
+      if (session && payload) {
+        console.log(`APP/SCOPES_UPDATE: updating scopes for ${shop}`);
         
         // Asynchrone Verarbeitung ohne await → Response sofort zurückgeben
         Promise.resolve().then(async () => {
           try {
-            await prisma.$transaction([
-              prisma.session.deleteMany({ where: { shop } }),
-              // Weitere Löschungen hier (z.B. Metafields, Jobs, etc.)
-            ]);
-            console.log(`APP/UNINSTALLED: cleanup done for ${shop}`);
+            const current = payload.current as string[];
+            await prisma.session.update({
+              where: { id: session.id },
+              data: { scope: current.toString() },
+            });
+            console.log(`APP/SCOPES_UPDATE: scopes updated for ${shop}`);
           } catch (err) {
-            console.error(`APP/UNINSTALLED: cleanup error for ${shop}`, err);
+            console.error(`APP/SCOPES_UPDATE: update error for ${shop}`, err);
           }
         });
       }
     } else {
-      console.log("APP/UNINSTALLED: no HMAC (test request) → respond 200");
+      console.log("APP/SCOPES_UPDATE: no HMAC (test request) → respond 200");
     }
 
     // Immer 200 OK innerhalb von 5s zurückgeben
     return json({ ok: true }, { status: 200 });
   } catch (err) {
-    console.error("APP/UNINSTALLED: webhook error:", err);
+    console.error("APP/SCOPES_UPDATE: webhook error:", err);
     // Auch bei Fehler 200 zurückgeben, um Retries zu vermeiden
     return json({ ok: true }, { status: 200 });
   }

@@ -10,7 +10,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const { topic, shop, payload } = await authenticate.webhook(request);
 
       if (topic?.toUpperCase() !== "APP_SUBSCRIPTIONS/UPDATE") {
-        console.warn(`Unexpected topic at /webhooks/app/subscriptions_update: ${topic}`);
+        console.warn(`Unexpected topic at /app/webhooks/app/subscriptions_update: ${topic}`);
       }
 
       if (shop && payload) {

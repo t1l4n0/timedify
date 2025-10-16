@@ -24,22 +24,20 @@ export default function Index() {
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string, newContext: boolean = true) => {
+  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string) => {
     const apiKey = 'e6e56f8533bfb028465f4cc4dfda86f9';
     
     let adminUrl: string;
     
     if (adminPath === '/themes/current/editor') {
       // Theme Editor - direkt zum aktiven Theme Editor
-      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
-      
       if (addAppBlockId) {
         const targetParam = target || 'newAppsSection';
         const templateParam = target === 'mainSection' ? 'product' : 'index';
         
         // Direkt zum Theme Editor des aktiven Themes mit App-Block
         // Verwende myshopify.com Domain und /current/editor für Deep-Links
-        const u = new URL(`https://${shopDomain}/admin/themes/current/editor`);
+        const u = new URL(`https://${shop}/admin/themes/current/editor`);
         const blockIdParam = `${apiKey}/${addAppBlockId}`;
         u.searchParams.set('template', templateParam);
         u.searchParams.set('addAppBlockId', blockIdParam);
@@ -47,26 +45,33 @@ export default function Index() {
         adminUrl = u.toString();
       } else {
         // Einfach zum Theme Editor des aktiven Themes
-        adminUrl = `https://${shopDomain}/admin/themes/current/editor`;
+        adminUrl = `https://${shop}/admin/themes/current/editor`;
       }
     } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
       // Managed Pricing URL - korrekte Billing-Seite
-      // Verwende die korrekte myshopify.com Domain
-      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
-      const u = new URL(`https://${shopDomain}/admin/charges/timed-content-app/pricing_plans`);
+      const u = new URL(`https://${shop}/admin/charges/timed-content-app/pricing_plans`);
       adminUrl = u.toString();
     } else {
       // Fallback für andere Admin-Pfade
-      const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
-      const u = new URL(`https://${shopDomain}/admin${adminPath}`);
+      const u = new URL(`https://${shop}/admin${adminPath}`);
       adminUrl = u.toString();
     }
     
-    // Verwende direkte Navigation für bessere Kompatibilität
-    if (newContext) {
+    // Verwende App Bridge Redirect.Action.REMOTE für korrekte myshopify.com Navigation
+    try {
+      if (app) {
+        const redirect = Redirect.create(app as any);
+        redirect.dispatch(Redirect.Action.REMOTE, { 
+          url: adminUrl, 
+          newContext: true 
+        });
+      } else {
+        // Fallback für den Fall, dass App Bridge nicht verfügbar ist
+        window.open(adminUrl, '_blank');
+      }
+    } catch (error) {
+      // Fallback für den Fall, dass App Bridge nicht verfügbar ist
       window.open(adminUrl, '_blank');
-    } else {
-      window.location.href = adminUrl;
     }
   };
 
@@ -82,7 +87,7 @@ export default function Index() {
               onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection'),
             } : {
               content: '📋 View Plans',
-              onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans', undefined, undefined, false),
+              onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans'),
             }}
           >
             <p>
