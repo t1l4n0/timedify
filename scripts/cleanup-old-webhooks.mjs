@@ -2,8 +2,8 @@
 
 /**
  * Cleanup-Script für alte Webhook-Subscriptions
- * Entfernt doppelte Webhooks auf /webhooks/* Pfaden (ohne /app)
- * Stellt sicher, dass nur /app/webhooks/* Pfade aktiv sind
+ * Entfernt doppelte Webhooks auf /app/webhooks/* Pfaden (alt)
+ * Stellt sicher, dass nur /webhooks/* Pfade aktiv sind
  */
 
 import { shopifyApp } from "@shopify/shopify-app-remix/server";
@@ -189,33 +189,33 @@ async function cleanupOldWebhooks() {
           total += edges.length;
 
           for (const { node: webhook } of edges) {
-            const isOldPath = webhook.callbackUrl.includes('/webhooks/') && !webhook.callbackUrl.includes('/app/webhooks/');
+            const isOldPath = webhook.callbackUrl.includes('/app/webhooks/');
             const isOldTopic = oldWebhookTopics.includes(webhook.topic);
             const isOldApiVersion = webhook.apiVersion?.handle !== '2025-10';
             const isSameApp = sameOrigin(webhook.callbackUrl);
 
-            if (isSameApp && ((isOldPath && isOldTopic) || isOldApiVersion)) {
-            const action = DRY_RUN ? "DRY-RUN delete" : "Deleting";
-            console.log(`🗑️  ${action}: ${webhook.topic} -> ${webhook.callbackUrl} (${webhook.apiVersion?.handle})`);
-            
-            try {
-              if (DRY_RUN) continue;
-              await client.request(`#graphql
-                mutation webhookSubscriptionDelete($id: ID!) {
-                  webhookSubscriptionDelete(id: $id) {
-                    deletedWebhookSubscriptionId
-                    userErrors {
-                      field
-                      message
+              if (isSameApp && ((isOldPath && isOldTopic) || isOldApiVersion)) {
+                const action = DRY_RUN ? "DRY-RUN delete" : "Deleting";
+                console.log(`🗑️  ${action}: ${webhook.topic} -> ${webhook.callbackUrl} (${webhook.apiVersion?.handle})`);
+
+                try {
+                  if (DRY_RUN) continue;
+                  await client.request(`#graphql
+                    mutation webhookSubscriptionDelete($id: ID!) {
+                      webhookSubscriptionDelete(id: $id) {
+                        deletedWebhookSubscriptionId
+                        userErrors {
+                          field
+                          message
+                        }
+                      }
                     }
-                  }
+                  `, { variables: { id: webhook.id } });
+
+                  console.log(`✅ Deleted webhook: ${webhook.topic}`);
+                } catch (deleteError) {
+                  console.error(`❌ Failed to delete webhook ${webhook.topic}:`, deleteError.message);
                 }
-              `, { variables: { id: webhook.id } });
-              
-              console.log(`✅ Deleted webhook: ${webhook.topic}`);
-            } catch (deleteError) {
-              console.error(`❌ Failed to delete webhook ${webhook.topic}:`, deleteError.message);
-            }
           }
           cursor = page?.pageInfo?.hasNextPage ? page.pageInfo.endCursor : null;
         } while (cursor);
@@ -231,7 +231,7 @@ async function cleanupOldWebhooks() {
     if (DRY_RUN) {
       console.log("💡 DRY-RUN: No webhooks were actually deleted");
     } else {
-      console.log("💡 Only /app/webhooks/* paths with API version 2025-10 should remain");
+      console.log("💡 Only /webhooks/* paths with API version 2025-10 should remain");
     }
     
   } catch (error) {

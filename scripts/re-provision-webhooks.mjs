@@ -152,27 +152,27 @@ async function reProvisionWebhooks() {
           webhooks: [
             {
               topic: "app/scopes_update",
-              uri: "/app/webhooks/app/scopes_update",
+              uri: "/webhooks/app/scopes_update",
             },
             {
               topic: "app_subscriptions/update",
-              uri: "/app/webhooks/app/subscriptions_update",
+              uri: "/webhooks/app/subscriptions_update",
             },
             {
               topic: "app/uninstalled",
-              uri: "/app/webhooks/app/uninstalled",
+              uri: "/webhooks/app/uninstalled",
             },
             {
               topic: "customers/data_request",
-              uri: "/app/webhooks/customers/data_request",
+              uri: "/webhooks/customers/data_request",
             },
             {
-              topic: "customers/redact", 
-              uri: "/app/webhooks/customers/redact",
+              topic: "customers/redact",
+              uri: "/webhooks/customers/redact",
             },
             {
               topic: "shop/redact",
-              uri: "/app/webhooks/shop/redact",
+              uri: "/webhooks/shop/redact",
             },
           ],
         });
@@ -185,7 +185,7 @@ async function reProvisionWebhooks() {
 
     console.log("🎉 Webhook re-provisioning completed!");
     console.log("💡 Check webhook deliveries in Partner Dashboard to verify API version 2025-10");
-    console.log("🧹 Note: Old webhooks on /webhooks/* paths may need manual cleanup to avoid duplicates");
+    console.log("🧹 Note: Old webhooks on /app/webhooks/* paths may need manual cleanup to avoid duplicates");
     
   } catch (error) {
     console.error("❌ Re-provisioning failed:", error);

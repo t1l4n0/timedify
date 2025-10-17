@@ -14,12 +14,12 @@ echo ""
 
 # Webhook-Endpoints mit Topics (portabel für macOS/bash v3.2)
 ENDPOINTS_LIST=$(cat <<'EOF'
-/app/webhooks/app/scopes_update|app/scopes_update
-/app/webhooks/app/subscriptions_update|app_subscriptions/update
-/app/webhooks/app/uninstalled|app/uninstalled
-/app/webhooks/customers/data_request|customers/data_request
-/app/webhooks/customers/redact|customers/redact
-/app/webhooks/shop/redact|shop/redact
+/webhooks/app/scopes_update|app/scopes_update
+/webhooks/app/subscriptions_update|app_subscriptions/update
+/webhooks/app/uninstalled|app/uninstalled
+/webhooks/customers/data_request|customers/data_request
+/webhooks/customers/redact|customers/redact
+/webhooks/shop/redact|shop/redact
 EOF
 )
 
