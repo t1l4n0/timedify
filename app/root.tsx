@@ -1,7 +1,8 @@
 import type { LinksFunction, HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import { json, type SerializeFrom } from "@remix-run/node";
-import { useMemo } from "react";
+import { createContext, type PropsWithChildren, useMemo } from "react";
+import type { ShopifyGlobal } from "@shopify/app-bridge-types";
 import { I18nManager, I18nContext, useI18n } from "@shopify/react-i18n";
 import { APP_LOCALES, getLocale, type SupportedLocale } from "~/locales";
 
@@ -28,9 +29,15 @@ export const headers: HeadersFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const locale = getLocale(request);
+  const url = new URL(request.url);
+  const host = url.searchParams.get("host") ?? "";
+  const shop = url.searchParams.get("shop") ?? "";
+
   return json(
     {
       apiKey: process.env.SHOPIFY_API_KEY ?? "",
+      host,
+      shop,
       locale,
     },
     { headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" } }
@@ -39,7 +46,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export type RootLoaderData = SerializeFrom<typeof loader>;
 
-function AppWithTranslations({ locale, apiKey }: { locale: SupportedLocale; apiKey: string }) {
+const AppBridgeContext = createContext<ShopifyGlobal | null>(null);
+
+type AppBridgeProviderProps = PropsWithChildren<{
+  apiKey: string;
+  host: string;
+  shop: string;
+}>;
+
+function AppBridgeProvider({ apiKey, host, shop, children }: AppBridgeProviderProps) {
+  const value = useMemo(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    if (!apiKey || !host) {
+      return null;
+    }
+
+    return window.shopify ?? null;
+  }, [apiKey, host, shop]);
+
+  return <AppBridgeContext.Provider value={value}>{children}</AppBridgeContext.Provider>;
+}
+
+function AppWithTranslations({
+  locale,
+  apiKey,
+  host,
+  shop,
+}: {
+  locale: SupportedLocale;
+  apiKey: string;
+  host: string;
+  shop: string;
+}) {
   const [_i18n, ShareTranslations] = useI18n({
     id: "app",
     translations: APP_LOCALES,
@@ -53,6 +94,9 @@ function AppWithTranslations({ locale, apiKey }: { locale: SupportedLocale; apiK
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width,initial-scale=1" />
           <meta name="shopify-api-key" content={apiKey} />
+          {host ? <meta name="shopify-host" content={host} /> : null}
+          {shop ? <meta name="shopify-shop-domain" content={shop} /> : null}
+          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
           <Meta />
           <Links />
         </head>
@@ -67,7 +111,7 @@ function AppWithTranslations({ locale, apiKey }: { locale: SupportedLocale; apiK
 }
 
 export default function App() {
-  const { locale, apiKey } = useLoaderData<typeof loader>();
+  const { locale, apiKey, host, shop } = useLoaderData<typeof loader>();
   const manager = useMemo(
     () => new I18nManager({ locale, fallbackLocale: "en" }),
     [locale]
@@ -75,7 +119,9 @@ export default function App() {
 
   return (
     <I18nContext.Provider value={manager}>
-      <AppWithTranslations locale={locale} apiKey={apiKey} />
+      <AppBridgeProvider apiKey={apiKey} host={host} shop={shop}>
+        <AppWithTranslations locale={locale} apiKey={apiKey} host={host} shop={shop} />
+      </AppBridgeProvider>
     </I18nContext.Provider>
   );
 }
