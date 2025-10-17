@@ -9,17 +9,41 @@ import {
   VideoThumbnail,
   Modal,
   Banner,
+  Badge,
 } from "@shopify/polaris";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // App Bridge 4.x: Redirect Actions sind deprecated, verwende moderne API
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
+import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const shopify = useAppBridge();
+  const authenticatedFetch = useAuthenticatedFetch();
+  const [apiStatus, setApiStatus] = useState<"idle" | "ok" | "error">("idle");
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    authenticatedFetch({ endpoint: "/api/ping" })
+      .then(() => {
+        if (isSubscribed) {
+          setApiStatus("ok");
+        }
+      })
+      .catch(() => {
+        if (isSubscribed) {
+          setApiStatus("error");
+        }
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -101,6 +125,13 @@ export default function Index() {
                 ? 'You can use all app features.'
                 : 'A subscription is required to use all features.'}
             </p>
+            <div style={{ marginTop: "0.5rem" }}>
+              <Badge tone={apiStatus === "ok" ? "success" : apiStatus === "error" ? "critical" : "attention"}>
+                {apiStatus === "ok" && "API reachable"}
+                {apiStatus === "error" && "API unreachable"}
+                {apiStatus === "idle" && "Checking API..."}
+              </Badge>
+            </div>
           </Banner>
         </Layout.Section>
 
