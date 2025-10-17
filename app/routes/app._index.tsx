@@ -11,7 +11,7 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { useState } from "react";
-import { Redirect } from "@shopify/app-bridge/actions";
+// App Bridge 4.x: Redirect Actions sind deprecated, verwende moderne API
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
@@ -19,13 +19,20 @@ import { APP_ROUTE_ID } from "./app";
 export default function Index() {
   const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const app = useAppBridge();
+  const shopify = useAppBridge();
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = (adminPath: string, addAppBlockId?: string, target?: string) => {
-    const apiKey = 'e6e56f8533bfb028465f4cc4dfda86f9';
+  const goToAdmin = async (adminPath: string, addAppBlockId?: string, target?: string) => {
+    // API-Key aus Meta-Tag holen statt hardcoden
+    const apiKey = document.querySelector('meta[name="shopify-api-key"]')?.getAttribute('content') || '';
+    
+    // Sicherheitscheck: Nur myshopify.com Domains erlauben
+    if (!shop.endsWith('.myshopify.com')) {
+      console.error('Invalid shop domain:', shop);
+      return;
+    }
     
     let adminUrl: string;
     
@@ -57,14 +64,13 @@ export default function Index() {
       adminUrl = u.toString();
     }
     
-    // Verwende App Bridge Redirect.Action.REMOTE für korrekte myshopify.com Navigation
+    // App Bridge 4.x: Moderne API ohne Actions
     try {
-      if (app) {
-        const redirect = Redirect.create(app as any);
-        redirect.dispatch(Redirect.Action.REMOTE, { 
-          url: adminUrl, 
-          newContext: true 
-        });
+      if (shopify) {
+        // Zeige Toast-Benachrichtigung für bessere UX
+        await shopify.toast.show('Opening admin...');
+        // Verwende window.open für Navigation (App Bridge 4.x Standard)
+        window.open(adminUrl, '_top');
       } else {
         // Fallback für den Fall, dass App Bridge nicht verfügbar ist
         window.open(adminUrl, '_blank');

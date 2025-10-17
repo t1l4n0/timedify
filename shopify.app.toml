@@ -9,7 +9,7 @@ embedded = true
 [build]
 
 [webhooks]
-api_version = "2025-07"
+api_version = "2025-10"
 
   [[webhooks.subscriptions]]
   uri = "/app/webhooks/customers/data_request"
