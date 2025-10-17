@@ -1,8 +1,7 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { authenticate } from "~/shopify.server";
+import { validateSessionToken } from "~/utils/validateSessionToken.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  // Verifiziert die aktuelle Händler-Session (setzt 401/302 bei Bedarf)
-  await authenticate.admin(request);
+  await validateSessionToken(request);
   return json({ ok: true, ts: Date.now() });
 }

@@ -9,11 +9,12 @@ import {
   VideoThumbnail,
   Modal,
   Banner,
+  Badge,
 } from "@shopify/polaris";
-import { useCallback, useState } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
+import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 
 type ShopifyAppBridgeWithRedirect = ReturnType<typeof useAppBridge> & {
   redirect: {
@@ -26,7 +27,6 @@ export default function Index() {
     hasActiveSub: boolean;
   };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const shopify = useAppBridge() as ShopifyAppBridgeWithRedirect;
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -77,6 +77,13 @@ export default function Index() {
                 ? 'You can use all app features.'
                 : 'A subscription is required to use all features.'}
             </p>
+            <div style={{ marginTop: "0.5rem" }}>
+              <Badge tone={apiStatus === "ok" ? "success" : apiStatus === "error" ? "critical" : "attention"}>
+                {apiStatus === "ok" && "API reachable"}
+                {apiStatus === "error" && "API unreachable"}
+                {apiStatus === "idle" && "Checking API..."}
+              </Badge>
+            </div>
           </Banner>
         </Layout.Section>
 
