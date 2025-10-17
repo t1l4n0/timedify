@@ -56,7 +56,6 @@ function AppWithTranslations({ locale, apiKey }: { locale: SupportedLocale; apiK
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width,initial-scale=1" />
           <meta name="shopify-api-key" content={apiKey} />
-          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
           <Meta />
           <Links />
         </head>

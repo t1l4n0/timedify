@@ -23,9 +23,6 @@ api_version = "2025-10"
   uri = "/app/webhooks/shop/redact"
   compliance_topics = [ "shop/redact" ]
 
-  [[webhooks.subscriptions]]
-  topics = [ "app_subscriptions/update" ]
-  uri = "/app/webhooks/app/subscriptions_update"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]

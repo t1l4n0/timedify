@@ -10,14 +10,8 @@
     "typecheck": "tsc",
     "test": "vitest",
     "test:webhooks": "tsx scripts/test-webhooks.ts",
-    "test:synthetic": "./scripts/synthetic-webhook-test.sh",
-    "test:dev-smoke": "./scripts/dev-smoke-test.sh",
     "health-check": "./scripts/health-check.sh",
-    "alerting-check": "./scripts/alerting-check.sh",
-    "retention-cleanup": "./scripts/retention-cleanup.sh",
-    "logs-watch": "./scripts/logs-watch.sh 30",
-    "post-deploy-smoke": "./scripts/post-deploy-smoke.sh",
-    "ops-dashboard": "./scripts/ops-dashboard.sh"
+    "post-deploy-smoke": "./scripts/post-deploy-smoke.sh"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
