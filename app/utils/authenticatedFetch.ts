@@ -1,8 +1,7 @@
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { authenticatedFetch } from "@shopify/app-bridge/utilities";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
-export interface AuthenticatedFetchOptions extends RequestInit {
+export interface AuthenticatedFetchOptions extends Omit<RequestInit, "body"> {
   endpoint: string;
   method?: string;
   body?: unknown;
@@ -10,30 +9,42 @@ export interface AuthenticatedFetchOptions extends RequestInit {
 
 /**
  * Hook für authentifizierte Fetch-Requests mit Session-Token aus App Bridge v4.
- * Nutzt die offizielle `authenticatedFetch` Utility, damit Tokens immer korrekt übertragen werden.
+ * Verwendet `shopify.idToken()` um ein Session-Token zu erhalten und sendet es
+ * automatisch als Bearer-Token im Authorization-Header mit.
  */
 export function useAuthenticatedFetch() {
   const shopify = useAppBridge();
-  const fetchWithToken = useMemo(() => authenticatedFetch(shopify), [shopify]);
 
   return useCallback(
     async ({ endpoint, method = "GET", body, ...fetchOptions }: AuthenticatedFetchOptions) => {
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...fetchOptions.headers,
-      };
+      const isGetRequest = method.toUpperCase() === "GET";
+      const headers = new Headers(fetchOptions.headers ?? {});
 
-      const config: RequestInit = {
+      let serializedBody: BodyInit | undefined;
+      if (body !== undefined && !isGetRequest) {
+        serializedBody = typeof body === "string" ? body : JSON.stringify(body);
+        if (!headers.has("Content-Type")) {
+          headers.set("Content-Type", "application/json");
+        }
+      }
+
+      if (typeof window !== "undefined") {
+        try {
+          const token = await shopify.idToken();
+          if (token) {
+            headers.set("Authorization", `Bearer ${token}`);
+          }
+        } catch (error) {
+          console.warn("Failed to retrieve session token", error);
+        }
+      }
+
+      const response = await fetch(endpoint, {
         ...fetchOptions,
         method,
         headers,
-      };
-
-      if (body !== undefined && method !== "GET") {
-        config.body = typeof body === "string" ? body : JSON.stringify(body);
-      }
-
-      const response = await fetchWithToken(endpoint, config);
+        body: serializedBody,
+      });
 
       if (response.status === 401) {
         throw new Error("Unauthorized");
@@ -50,6 +61,6 @@ export function useAuthenticatedFetch() {
 
       return response;
     },
-    [fetchWithToken]
+    [shopify]
   );
 }

@@ -15,18 +15,46 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
+import { useCallback, useEffect, useState } from "react";
 
-type ShopifyAppBridgeWithRedirect = ReturnType<typeof useAppBridge> & {
-  redirect: {
-    toAdminPath: (path: string) => Promise<void> | void;
-  };
-};
+type ApiStatus = "idle" | "ok" | "error";
 
 export default function Index() {
   const { hasActiveSub, apiKey } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
     hasActiveSub: boolean;
   };
+  const shopify = useAppBridge();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [apiStatus, setApiStatus] = useState<ApiStatus>("idle");
+  const authenticatedFetch = useAuthenticatedFetch();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function checkApiHealth() {
+      try {
+        await authenticatedFetch({ endpoint: "/api/ping" });
+        if (isMounted) {
+          setApiStatus("ok");
+        }
+      } catch (error) {
+        if (isMounted) {
+          setApiStatus("error");
+        }
+        console.debug("API health check failed", error);
+      }
+    }
+
+    checkApiHealth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -51,8 +79,32 @@ export default function Index() {
         }
       }
 
-      await shopify.toast.show("Opening Shopify admin…");
-      await shopify.redirect.toAdminPath(finalPath);
+      shopify.toast?.show?.("Opening Shopify admin…");
+
+      const fallbackUrl = (() => {
+        if (typeof window === "undefined") {
+          return finalPath;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const hostParam = params.get("host");
+
+        if (!hostParam) {
+          return finalPath;
+        }
+
+        try {
+          const decoded = atob(hostParam);
+          const normalizedBase = decoded.startsWith("https://") ? decoded : `https://${decoded}`;
+          const base = normalizedBase.replace(/\/$/, "");
+          return `${base}${finalPath.startsWith("/") ? finalPath : `/${finalPath}`}`;
+        } catch (error) {
+          console.warn("Failed to decode host parameter", error);
+          return finalPath;
+        }
+      })();
+
+      window.open(fallbackUrl, "_parent");
     },
     [apiKey, shopify]
   );
@@ -79,9 +131,11 @@ export default function Index() {
             </p>
             <div style={{ marginTop: "0.5rem" }}>
               <Badge tone={apiStatus === "ok" ? "success" : apiStatus === "error" ? "critical" : "attention"}>
-                {apiStatus === "ok" && "API reachable"}
-                {apiStatus === "error" && "API unreachable"}
-                {apiStatus === "idle" && "Checking API..."}
+                {apiStatus === "ok"
+                  ? "API reachable"
+                  : apiStatus === "error"
+                  ? "API unreachable"
+                  : "Checking API..."}
               </Badge>
             </div>
           </Banner>

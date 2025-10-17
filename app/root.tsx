@@ -1,8 +1,7 @@
 import type { LinksFunction, HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import { json, type SerializeFrom } from "@remix-run/node";
-import { createContext, type PropsWithChildren, useMemo } from "react";
-import type { ShopifyGlobal } from "@shopify/app-bridge-types";
+import { useMemo } from "react";
 import { I18nManager, I18nContext, useI18n } from "@shopify/react-i18n";
 import { APP_LOCALES, getLocale, type SupportedLocale } from "~/locales";
 
@@ -45,30 +44,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export type RootLoaderData = SerializeFrom<typeof loader>;
-
-const AppBridgeContext = createContext<ShopifyGlobal | null>(null);
-
-type AppBridgeProviderProps = PropsWithChildren<{
-  apiKey: string;
-  host: string;
-  shop: string;
-}>;
-
-function AppBridgeProvider({ apiKey, host, shop, children }: AppBridgeProviderProps) {
-  const value = useMemo(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    if (!apiKey || !host) {
-      return null;
-    }
-
-    return window.shopify ?? null;
-  }, [apiKey, host, shop]);
-
-  return <AppBridgeContext.Provider value={value}>{children}</AppBridgeContext.Provider>;
-}
 
 function AppWithTranslations({
   locale,
@@ -119,9 +94,7 @@ export default function App() {
 
   return (
     <I18nContext.Provider value={manager}>
-      <AppBridgeProvider apiKey={apiKey} host={host} shop={shop}>
-        <AppWithTranslations locale={locale} apiKey={apiKey} host={host} shop={shop} />
-      </AppBridgeProvider>
+      <AppWithTranslations locale={locale} apiKey={apiKey} host={host} shop={shop} />
     </I18nContext.Provider>
   );
 }
