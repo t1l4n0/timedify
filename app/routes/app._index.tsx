@@ -60,7 +60,7 @@ export default function Index() {
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
   const goToAdmin = useCallback(
-    async (adminPath: string, addAppBlockId?: string, target?: string) => {
+    (adminPath: string, addAppBlockId?: string, target?: string) => {
       let finalPath = adminPath;
 
       if (adminPath === "/themes/current/editor") {
