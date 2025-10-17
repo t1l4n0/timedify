@@ -1,8 +1,8 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { createStaticHandler } from "@remix-run/router";
+import type { LoaderFunction } from "@remix-run/node";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authenticateAdminMock = vi.fn();
+const validateSessionTokenMock = vi.fn();
 
 vi.mock("~/shopify.server", () => ({
   authenticate: {
@@ -10,21 +10,18 @@ vi.mock("~/shopify.server", () => ({
   },
 }));
 
-type Loader = (args: LoaderFunctionArgs) => Promise<Response> | Response;
+vi.mock("~/utils/validateSessionToken.server", () => ({
+  validateSessionToken: validateSessionTokenMock,
+}));
 
-async function invokeLoader(path: string, loader: Loader) {
-  const normalizedPath = path.replace(/^\//, "");
-  const routeId = `test:${normalizedPath}`;
-  const handler = createStaticHandler([
-    {
-      id: routeId,
-      path: normalizedPath,
-      loader,
-    },
-  ]);
+async function invokeLoader(path: string, loader: LoaderFunction, init?: RequestInit) {
+  const request = new Request(`http://localhost${path}`, init);
+  const result = await loader({
+    request,
+    params: {},
+    context: undefined as never,
+  });
 
-  const request = new Request(`http://localhost${path}`);
-  const result = await handler.queryRoute(request, { routeId });
   if (result instanceof Response) {
     return result;
   }
@@ -36,6 +33,8 @@ describe("Core Endpoints", () => {
   beforeEach(() => {
     authenticateAdminMock.mockClear();
     authenticateAdminMock.mockResolvedValue(undefined);
+    validateSessionTokenMock.mockClear();
+    validateSessionTokenMock.mockResolvedValue({});
   });
 
   it("health loader returns ok response", async () => {
@@ -51,12 +50,16 @@ describe("Core Endpoints", () => {
 
   it("api ping loader returns ok payload", async () => {
     const { loader: pingLoader } = await import("~/routes/api.ping");
-    const response = await invokeLoader("/api/ping", pingLoader);
+    const response = await invokeLoader("/api/ping", pingLoader, {
+      headers: {
+        Authorization: "Bearer test-token",
+      },
+    });
     expect(response.status).toBe(200);
 
     const data = await response.json();
     expect(data).toMatchObject({ ok: true });
     expect(typeof data.ts).toBe("number");
-    expect(authenticateAdminMock).toHaveBeenCalled();
+    expect(validateSessionTokenMock).toHaveBeenCalledWith(expect.any(Request));
   });
 });

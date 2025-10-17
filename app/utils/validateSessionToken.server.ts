@@ -31,13 +31,18 @@ function getBasicParams(): SessionValidationParams {
     normalizedUrl.port = process.env.PORT;
   }
 
+  const hostScheme = normalizedUrl.protocol.replace(":", "");
+  if (hostScheme !== "http" && hostScheme !== "https") {
+    throw new Error(`Unsupported host scheme for session token validation: ${hostScheme}`);
+  }
+
   const api = shopifyApi({
     apiKey,
     apiSecretKey: apiSecret,
     apiVersion: ApiVersion.October25,
     scopes: scopes ? scopes.split(",") : [],
     hostName: normalizedUrl.host,
-    hostScheme: normalizedUrl.protocol.replace(":", ""),
+    hostScheme,
     isEmbeddedApp: true,
   });
 
