@@ -1,18 +1,16 @@
+import type { ShopifyGlobal } from "@shopify/app-bridge-types";
+
 declare module "*.css";
 
 // Shopify App Bridge v4 global types
 declare global {
   interface Window {
-    shopify?: {
-      reviews?: {
-        request(): Promise<ReviewRequestResponse>;
-      };
-    };
+    shopify?: ShopifyGlobal;
   }
 }
 
 // Strict typing for Shopify Reviews API
-export type ReviewResultCode = 
+export type ReviewResultCode =
   | 'already-reviewed'
   | 'cooldown-period' 
   | 'annual-limit-reached'

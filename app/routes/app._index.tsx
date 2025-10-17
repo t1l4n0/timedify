@@ -11,99 +11,51 @@ import {
   Banner,
   Badge,
 } from "@shopify/polaris";
-import { useEffect, useState } from "react";
-// App Bridge 4.x: Redirect Actions sind deprecated, verwende moderne API
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 
+type ShopifyAppBridgeWithRedirect = ReturnType<typeof useAppBridge> & {
+  redirect: {
+    toAdminPath: (path: string) => Promise<void> | void;
+  };
+};
+
 export default function Index() {
-  const { shop, hasActiveSub } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & { hasActiveSub: boolean };
+  const { hasActiveSub, apiKey } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
+    hasActiveSub: boolean;
+  };
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const shopify = useAppBridge();
-  const authenticatedFetch = useAuthenticatedFetch();
-  const [apiStatus, setApiStatus] = useState<"idle" | "ok" | "error">("idle");
-
-  useEffect(() => {
-    let isSubscribed = true;
-
-    authenticatedFetch({ endpoint: "/api/ping" })
-      .then(() => {
-        if (isSubscribed) {
-          setApiStatus("ok");
-        }
-      })
-      .catch(() => {
-        if (isSubscribed) {
-          setApiStatus("error");
-        }
-      });
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
-  const goToAdmin = async (adminPath: string, addAppBlockId?: string, target?: string) => {
-    // API-Key aus Meta-Tag holen statt hardcoden
-    const apiKey = document.querySelector('meta[name="shopify-api-key"]')?.getAttribute('content') || '';
-    
-    // Sicherheitscheck: Nur myshopify.com Domains erlauben
-    if (!shop.endsWith('.myshopify.com')) {
-      console.error('Invalid shop domain:', shop);
-      return;
-    }
-    
-    let adminUrl: string;
-    
-    if (adminPath === '/themes/current/editor') {
-      // Theme Editor - direkt zum aktiven Theme Editor
-      if (addAppBlockId) {
-        const targetParam = target || 'newAppsSection';
-        const templateParam = target === 'mainSection' ? 'product' : 'index';
-        
-        // Direkt zum Theme Editor des aktiven Themes mit App-Block
-        // Verwende myshopify.com Domain und /current/editor für Deep-Links
-        const u = new URL(`https://${shop}/admin/themes/current/editor`);
-        const blockIdParam = `${apiKey}/${addAppBlockId}`;
-        u.searchParams.set('template', templateParam);
-        u.searchParams.set('addAppBlockId', blockIdParam);
-        u.searchParams.set('target', targetParam);
-        adminUrl = u.toString();
-      } else {
-        // Einfach zum Theme Editor des aktiven Themes
-        adminUrl = `https://${shop}/admin/themes/current/editor`;
+  const goToAdmin = useCallback(
+    async (adminPath: string, addAppBlockId?: string, target?: string) => {
+      let finalPath = adminPath;
+
+      if (adminPath === "/themes/current/editor") {
+        const params = new URLSearchParams();
+
+        if (addAppBlockId) {
+          const blockIdParam = `${apiKey}/${addAppBlockId}`;
+          params.set("addAppBlockId", blockIdParam);
+          params.set("target", target ?? "newAppsSection");
+          params.set("template", target === "mainSection" ? "product" : "index");
+        }
+
+        const queryString = params.toString();
+        if (queryString) {
+          finalPath = `${adminPath}?${queryString}`;
+        }
       }
-    } else if (adminPath === '/charges/timed-content-app/pricing_plans') {
-      // Managed Pricing URL - korrekte Billing-Seite
-      const u = new URL(`https://${shop}/admin/charges/timed-content-app/pricing_plans`);
-      adminUrl = u.toString();
-    } else {
-      // Fallback für andere Admin-Pfade
-      const u = new URL(`https://${shop}/admin${adminPath}`);
-      adminUrl = u.toString();
-    }
-    
-    // App Bridge 4.x: Moderne API ohne Actions
-    try {
-      if (shopify) {
-        // Zeige Toast-Benachrichtigung für bessere UX
-        await shopify.toast.show('Opening admin...');
-        // Verwende window.open für Navigation (App Bridge 4.x Standard)
-        window.open(adminUrl, '_top');
-      } else {
-        // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-        window.open(adminUrl, '_blank');
-      }
-    } catch (error) {
-      // Fallback für den Fall, dass App Bridge nicht verfügbar ist
-      window.open(adminUrl, '_blank');
-    }
-  };
+
+      await shopify.toast.show("Opening Shopify admin…");
+      await shopify.redirect.toAdminPath(finalPath);
+    },
+    [apiKey, shopify]
+  );
 
   return (
     <Page title="Timedify - Time-Controlled Content">
