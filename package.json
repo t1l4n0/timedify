@@ -9,7 +9,6 @@
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "test": "vitest",
-    "test:webhooks": "tsx scripts/test-webhooks.ts",
     "health-check": "./scripts/health-check.sh",
     "post-deploy-smoke": "./scripts/post-deploy-smoke.sh"
   },

@@ -27,13 +27,10 @@ export const headers: HeadersFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const host = url.searchParams.get("host") || "";
   const locale = getLocale(request);
   return json(
     {
       apiKey: process.env.SHOPIFY_API_KEY ?? "",
-      host,
       locale,
     },
     { headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" } }

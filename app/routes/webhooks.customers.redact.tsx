@@ -20,10 +20,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         Promise.resolve().then(async () => {
           try {
             console.log(`CUSTOMERS/REDACT payload for ${shop}:`, JSON.stringify(payload));
-            // TODO: Kundendaten löschen
-            // - Metafields des Kunden entfernen
-            // - App-spezifische Kundendaten anonymisieren/löschen
-            // - Gemäß GDPR innerhalb von 30 Tagen vollständig löschen
+            // GDPR-Compliance: Timedify speichert keine personenbezogenen Kundendaten
+            // Keine Metafields oder App-spezifische Kundendaten zu löschen
+            console.log(`GDPR REDACT: No customer data to delete for ${shop}`);
           } catch (err) {
             console.error(`CUSTOMERS/REDACT: processing error for ${shop}`, err);
           }

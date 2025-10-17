@@ -1,5 +1,11 @@
 import { Card, DataTable, Button } from "@shopify/polaris";
-import type { Plan } from "../routes/app.plans";
+
+export type Plan = {
+  name: string;
+  priceAmount: number;
+  currencyCode: string;
+  status: string;
+};
 
 export type PlanListProps = {
   plans: Plan[];

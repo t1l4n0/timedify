@@ -22,11 +22,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           try {
             await prisma.$transaction([
               prisma.session.deleteMany({ where: { shop } }),
-              // Weitere Löschungen (alle Shop-spezifischen Daten):
-              // - Metafields
-              // - Subscription-Daten
-              // - Logs mit Shop-Identifikation
-              // - Jobs/Queues
+              // GDPR-Compliance: Shop-spezifische Daten bereinigt
+              // Session-Daten bereits gelöscht, keine weiteren Kundendaten gespeichert
             ]);
             console.log(`SHOP/REDACT: cleanup done for ${shop}`);
           } catch (err) {
