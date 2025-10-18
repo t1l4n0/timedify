@@ -1,5 +1,5 @@
-import { useAppBridge } from "@shopify/app-bridge-react";
 import { useCallback } from "react";
+import { waitForShopifyAppBridge } from "./shopifyAppBridge";
 
 export interface AuthenticatedFetchOptions extends Omit<RequestInit, "body"> {
   endpoint: string;
@@ -9,12 +9,10 @@ export interface AuthenticatedFetchOptions extends Omit<RequestInit, "body"> {
 
 /**
  * Hook für authentifizierte Fetch-Requests mit Session-Token aus App Bridge v4.
- * Verwendet `shopify.idToken()` um ein Session-Token zu erhalten und sendet es
- * automatisch als Bearer-Token im Authorization-Header mit.
+ * Fordert bevorzugt `shopify.sessionToken.get()` an (Fallback `shopify.idToken()`)
+ * und sendet das erhaltene Token automatisch als Bearer-Token im Authorization-Header.
  */
 export function useAuthenticatedFetch() {
-  const shopify = useAppBridge();
-
   return useCallback(
     async ({ endpoint, method = "GET", body, ...fetchOptions }: AuthenticatedFetchOptions) => {
       const isGetRequest = method.toUpperCase() === "GET";
@@ -29,13 +27,51 @@ export function useAuthenticatedFetch() {
       }
 
       if (typeof window !== "undefined") {
+        let cleanupAbortListener: (() => void) | undefined;
+
         try {
-          const token = await shopify.idToken();
+          let tokenAbortSignal: AbortSignal | undefined;
+
+          if (fetchOptions.signal) {
+            if (fetchOptions.signal.aborted) {
+              const alreadyAbortedController = new AbortController();
+              alreadyAbortedController.abort();
+              tokenAbortSignal = alreadyAbortedController.signal;
+            } else {
+              const abortController = new AbortController();
+              const propagateAbort = () => abortController.abort();
+              fetchOptions.signal.addEventListener("abort", propagateAbort, { once: true });
+              cleanupAbortListener = () => fetchOptions.signal?.removeEventListener("abort", propagateAbort);
+              tokenAbortSignal = abortController.signal;
+            }
+          }
+
+          let token: string | undefined;
+
+          const sessionTokenOptions = tokenAbortSignal ? { abort: tokenAbortSignal } : undefined;
+          const shopify = await waitForShopifyAppBridge({ signal: tokenAbortSignal });
+          const resolvedShopify = shopify ?? window.shopify;
+
+          if (resolvedShopify?.sessionToken?.get) {
+            token = await resolvedShopify.sessionToken.get(sessionTokenOptions);
+          }
+
+          if (!token && typeof resolvedShopify?.idToken === "function") {
+            token = await resolvedShopify.idToken();
+          }
+
           if (token) {
             headers.set("Authorization", `Bearer ${token}`);
           }
         } catch (error) {
-          console.warn("Failed to retrieve session token", error);
+          if (
+            !(error instanceof DOMException && error.name === "AbortError") &&
+            !(error instanceof Error && error.name === "AbortError")
+          ) {
+            console.warn("Failed to retrieve session token", error);
+          }
+        } finally {
+          cleanupAbortListener?.();
         }
       }
 
@@ -61,6 +97,6 @@ export function useAuthenticatedFetch() {
 
       return response;
     },
-    [shopify]
+    []
   );
 }

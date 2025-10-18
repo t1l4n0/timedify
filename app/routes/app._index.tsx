@@ -11,11 +11,11 @@ import {
   Banner,
   Badge,
 } from "@shopify/polaris";
-import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 import { useCallback, useEffect, useState } from "react";
+import { useShopifyAppBridge } from "~/utils/shopifyAppBridge";
 
 type ApiStatus = "idle" | "ok" | "error";
 
@@ -23,7 +23,7 @@ export default function Index() {
   const { hasActiveSub, apiKey } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
     hasActiveSub: boolean;
   };
-  const shopify = useAppBridge();
+  const shopify = useShopifyAppBridge();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [apiStatus, setApiStatus] = useState<ApiStatus>("idle");
   const authenticatedFetch = useAuthenticatedFetch();
@@ -79,7 +79,7 @@ export default function Index() {
         }
       }
 
-      shopify.toast?.show?.("Opening Shopify admin…");
+      shopify?.toast?.show?.("Opening Shopify admin…");
 
       const fallbackUrl = (() => {
         if (typeof window === "undefined") {

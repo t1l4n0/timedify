@@ -4,6 +4,7 @@ import { json, type SerializeFrom } from "@remix-run/node";
 import { useMemo } from "react";
 import { I18nManager, I18nContext, useI18n } from "@shopify/react-i18n";
 import { APP_LOCALES, getLocale, type SupportedLocale } from "~/locales";
+import { APP_BRIDGE_CDN_SOURCE, APP_BRIDGE_SCRIPT_ID } from "~/utils/shopifyAppBridge";
 
 // Variante A (robust mit Vite/Remix):
 import polarisStylesUrl from "@shopify/polaris/build/esm/styles.css?url";
@@ -45,6 +46,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export type RootLoaderData = SerializeFrom<typeof loader>;
 
+function createAppBridgeConfigScript({
+  apiKey,
+  host,
+  shop,
+}: {
+  apiKey: string;
+  host: string;
+  shop: string;
+}) {
+  if (!apiKey) {
+    return "window.shopify = window.shopify || {};";
+  }
+
+  const config: Record<string, string | boolean> = {
+    apiKey,
+    forceRedirect: true,
+  };
+
+  if (host) {
+    config.host = host;
+  }
+
+  if (shop) {
+    config.shop = shop;
+  }
+
+  const serializedConfig = JSON.stringify(config).replace(/</g, "\\u003C");
+
+  return `window.shopify = window.shopify || {};\nwindow.shopify.config = { ...window.shopify.config, ...${serializedConfig} };`;
+}
+
 function AppWithTranslations({
   locale,
   apiKey,
@@ -71,7 +103,13 @@ function AppWithTranslations({
           <meta name="shopify-api-key" content={apiKey} />
           {host ? <meta name="shopify-host" content={host} /> : null}
           {shop ? <meta name="shopify-shop-domain" content={shop} /> : null}
-          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
+          <script
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: createAppBridgeConfigScript({ apiKey, host, shop }),
+            }}
+          />
+          <script id={APP_BRIDGE_SCRIPT_ID} src={APP_BRIDGE_CDN_SOURCE} defer />
           <Meta />
           <Links />
         </head>
