@@ -108,7 +108,6 @@ function AppWithTranslations({
               __html: createAppBridgeConfigScript({ apiKey, host, shop }),
             }}
           />
-          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" defer />
           <Meta />
           <Links />
         </head>

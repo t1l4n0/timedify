@@ -9,8 +9,8 @@ export interface AuthenticatedFetchOptions extends Omit<RequestInit, "body"> {
 
 /**
  * Hook für authentifizierte Fetch-Requests mit Session-Token aus App Bridge v4.
- * Verwendet `shopify.idToken()` um ein Session-Token zu erhalten und sendet es
- * automatisch als Bearer-Token im Authorization-Header mit.
+ * Fordert bevorzugt `shopify.sessionToken.get()` an (Fallback `shopify.idToken()`)
+ * und sendet das erhaltene Token automatisch als Bearer-Token im Authorization-Header.
  */
 export function useAuthenticatedFetch() {
   const shopify = useAppBridge();
@@ -34,7 +34,6 @@ export function useAuthenticatedFetch() {
             await shopify.ready;
           }
 
-          const token = await shopify.idToken();
           if (token) {
             headers.set("Authorization", `Bearer ${token}`);
           }
