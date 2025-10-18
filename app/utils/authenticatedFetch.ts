@@ -34,14 +34,6 @@ export function useAuthenticatedFetch() {
             await shopify.ready;
           }
 
-          let token: string | undefined;
-
-          if (shopify.sessionToken?.get) {
-            token = await shopify.sessionToken.get();
-          } else if (typeof shopify.idToken === "function") {
-            token = await shopify.idToken();
-          }
-
           if (token) {
             headers.set("Authorization", `Bearer ${token}`);
           }
