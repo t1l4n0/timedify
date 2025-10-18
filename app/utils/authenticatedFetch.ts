@@ -30,6 +30,10 @@ export function useAuthenticatedFetch() {
 
       if (typeof window !== "undefined") {
         try {
+          if (typeof shopify.ready !== "undefined") {
+            await shopify.ready;
+          }
+
           const token = await shopify.idToken();
           if (token) {
             headers.set("Authorization", `Bearer ${token}`);
