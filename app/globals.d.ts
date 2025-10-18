@@ -1,11 +1,17 @@
 import type { ShopifyGlobal } from "@shopify/app-bridge-types";
 
+type SessionTokenApi = {
+  get(options?: { abort?: AbortSignal }): Promise<string>;
+};
+
 declare module "*.css";
 
-// Shopify App Bridge v4 global types
+// Shopify App Bridge v4 global types + session token augmentation
 declare global {
   interface Window {
-    shopify?: ShopifyGlobal;
+    shopify?: ShopifyGlobal & {
+      sessionToken?: SessionTokenApi;
+    };
   }
 }
 

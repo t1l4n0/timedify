@@ -45,6 +45,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export type RootLoaderData = SerializeFrom<typeof loader>;
 
+function createAppBridgeConfigScript({
+  apiKey,
+  host,
+  shop,
+}: {
+  apiKey: string;
+  host: string;
+  shop: string;
+}) {
+  if (!apiKey) {
+    return "window.shopify = window.shopify || {};";
+  }
+
+  const config: Record<string, string | boolean> = {
+    apiKey,
+    forceRedirect: true,
+  };
+
+  if (host) {
+    config.host = host;
+  }
+
+  if (shop) {
+    config.shop = shop;
+  }
+
+  const serializedConfig = JSON.stringify(config).replace(/</g, "\\u003C");
+
+  return `window.shopify = window.shopify || {};\nwindow.shopify.config = { ...window.shopify.config, ...${serializedConfig} };`;
+}
+
 function AppWithTranslations({
   locale,
   apiKey,
@@ -71,6 +102,12 @@ function AppWithTranslations({
           <meta name="shopify-api-key" content={apiKey} />
           {host ? <meta name="shopify-host" content={host} /> : null}
           {shop ? <meta name="shopify-shop-domain" content={shop} /> : null}
+          <script
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: createAppBridgeConfigScript({ apiKey, host, shop }),
+            }}
+          />
           <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
           <Meta />
           <Links />
