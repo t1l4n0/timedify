@@ -15,7 +15,7 @@ echo ""
 # Webhook-Endpoints mit Topics (portabel für macOS/bash v3.2)
 ENDPOINTS_LIST=$(cat <<'EOF'
 /webhooks/app/scopes_update|app/scopes_update
-/webhooks/app/subscriptions_update|app_subscriptions/update
+/webhooks/app/subscriptions/update|app_subscriptions/update
 /webhooks/app/uninstalled|app/uninstalled
 /webhooks/customers/data_request|customers/data_request
 /webhooks/customers/redact|customers/redact
