@@ -116,11 +116,11 @@ export default function Index() {
           <Card>
             <div style={{ padding: "1rem" }}>
               <div style={{ marginBottom: "1.5rem" }}>
-                <Text as="h2" variant="headingLg" color="success">
+                <Text as="h3" variant="headingMd" color="success">
                   Welcome to Timedify
                 </Text>
                 <div style={{ marginTop: "0.5rem" }}>
-                  <Text as="p" variant="bodyLg">
+                  <Text as="p" variant="bodyMd">
                     Timedify provides time-controlled content scheduling for Shopify stores. 
                     Schedule when content appears and disappears on your product pages, 
                     collection pages, and throughout your store with precise timing control.
