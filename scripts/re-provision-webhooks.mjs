@@ -156,7 +156,7 @@ async function reProvisionWebhooks() {
             },
             {
               topic: "app_subscriptions/update",
-              uri: "/webhooks/app/subscriptions_update",
+              uri: "/webhooks/app/subscriptions/update",
             },
             {
               topic: "app/uninstalled",

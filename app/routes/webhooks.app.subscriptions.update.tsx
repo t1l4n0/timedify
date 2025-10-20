@@ -5,6 +5,9 @@ import { authenticate } from "../shopify.server";
 // Webhook: app/subscriptions/update → setzt Shop-Metafield timedify.subscription_active (boolean)
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    // Debug: URL für Monitoring loggen
+    console.log(`[Webhook] app_subscriptions/update called at: ${request.url}`);
+    
     // HMAC-Verifikation und Admin-Client holen
     const { topic, shop, payload, admin } = await authenticate.webhook(request);
 
