@@ -1,6 +1,7 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useRouteError, isRouteErrorResponse, useRouteLoaderData } from "@remix-run/react";
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
+import { createApp } from "@shopify/app-bridge";
 import { authenticate } from "~/shopify.server";
 import type { SerializeFrom } from "@remix-run/node";
 import { Page, Layout, Card, Text, Banner } from "@shopify/polaris";
@@ -51,7 +52,54 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export type AppLoaderData = SerializeFrom<typeof loader>;
 
 export default function AppLayout() {
-  const { polarisTranslations } = useLoaderData<typeof loader>();
+  const { polarisTranslations, apiKey, shop } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData("root") as RootLoaderData;
+  const { host } = rootData;
+  
+  // Nur App Bridge initialisieren wenn alle erforderlichen Parameter vorhanden sind
+  const shouldInitializeAppBridge = apiKey && shop && host;
+  
+  // App Bridge global initialisieren (nur einmal)
+  if (typeof window !== "undefined" && shouldInitializeAppBridge) {
+    try {
+      // Prüfe ob App Bridge bereits initialisiert wurde
+      if (!(window as any).shopify) {
+        createApp({
+          apiKey,
+          host,
+          forceRedirect: true,
+        });
+      }
+    } catch (error) {
+      console.warn("Failed to initialize App Bridge:", error);
+    }
+  }
+  
+  if (!shouldInitializeAppBridge) {
+    return (
+      <PolarisProvider i18n={polarisTranslations}>
+        <Page title="Timedify - Configuration Error">
+          <Layout>
+            <Layout.Section>
+              <Card>
+                <div style={{ padding: "1rem" }}>
+                  <Banner
+                    title="Configuration Error"
+                    tone="critical"
+                  >
+                    <Text as="p" variant="bodyMd">
+                      This app must be accessed through the Shopify admin panel. 
+                      Please install and open the app from your Shopify admin.
+                    </Text>
+                  </Banner>
+                </div>
+              </Card>
+            </Layout.Section>
+          </Layout>
+        </Page>
+      </PolarisProvider>
+    );
+  }
   
   return (
     <PolarisProvider i18n={polarisTranslations}>
@@ -68,6 +116,7 @@ export function ErrorBoundary() {
   const rootData = useRouteLoaderData("root") as RootLoaderData;
   const locale = rootData.locale;
   const polarisTranslations = POLARIS_LOCALES[locale];
+  const { apiKey, host } = rootData;
 
   let errorMessage = i18n.translate("errorBoundary.unexpected");
   let errorDetails = "";
@@ -78,6 +127,24 @@ export function ErrorBoundary() {
   } else if (error instanceof Error) {
     errorMessage = error.message;
     errorDetails = error.stack || "";
+  }
+
+  const shouldInitializeAppBridge = apiKey && host;
+
+  // App Bridge global initialisieren (nur einmal)
+  if (typeof window !== "undefined" && shouldInitializeAppBridge) {
+    try {
+      // Prüfe ob App Bridge bereits initialisiert wurde
+      if (!(window as any).shopify) {
+        createApp({
+          apiKey,
+          host,
+          forceRedirect: true,
+        });
+      }
+    } catch (error) {
+      console.warn("Failed to initialize App Bridge:", error);
+    }
   }
 
   return (

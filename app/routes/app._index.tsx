@@ -9,15 +9,11 @@ import {
   VideoThumbnail,
   Modal,
   Banner,
-  Badge,
 } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
-import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
-import { useCallback, useEffect, useState } from "react";
-
-type ApiStatus = "idle" | "ok" | "error";
+import { useCallback, useState } from "react";
 
 export default function Index() {
   const { hasActiveSub, apiKey } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
@@ -25,36 +21,6 @@ export default function Index() {
   };
   const shopify = useAppBridge();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [apiStatus, setApiStatus] = useState<ApiStatus>("idle");
-  const authenticatedFetch = useAuthenticatedFetch();
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    let isMounted = true;
-
-    async function checkApiHealth() {
-      try {
-        await authenticatedFetch({ endpoint: "/api/ping" });
-        if (isMounted) {
-          setApiStatus("ok");
-        }
-      } catch (error) {
-        if (isMounted) {
-          setApiStatus("error");
-        }
-        console.debug("API health check failed", error);
-      }
-    }
-
-    checkApiHealth();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [authenticatedFetch]);
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -129,15 +95,6 @@ export default function Index() {
                 ? 'You can use all app features.'
                 : 'A subscription is required to use all features.'}
             </p>
-            <div style={{ marginTop: "0.5rem" }}>
-              <Badge tone={apiStatus === "ok" ? "success" : apiStatus === "error" ? "critical" : "attention"}>
-                {apiStatus === "ok"
-                  ? "API reachable"
-                  : apiStatus === "error"
-                  ? "API unreachable"
-                  : "Checking API..."}
-              </Badge>
-            </div>
           </Banner>
         </Layout.Section>
 

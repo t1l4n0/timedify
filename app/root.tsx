@@ -71,7 +71,10 @@ function AppWithTranslations({
           <meta name="shopify-api-key" content={apiKey} />
           {host ? <meta name="shopify-host" content={host} /> : null}
           {shop ? <meta name="shopify-shop-domain" content={shop} /> : null}
-          <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" defer />
+          <script 
+            src="https://cdn.shopify.com/shopifycloud/app-bridge.js" 
+            data-api-key={apiKey}
+          />
           <Meta />
           <Links />
         </head>
