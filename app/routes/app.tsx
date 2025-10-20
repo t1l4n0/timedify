@@ -8,6 +8,7 @@ import { Page, Layout, Card, Text, Banner } from "@shopify/polaris";
 import { useI18n } from "@shopify/react-i18n";
 import { POLARIS_LOCALES, getLocale } from "~/locales";
 import type { RootLoaderData } from "~/root";
+import { syncSubscriptionStatusToMetafield } from "~/utils/billing";
 
 export const APP_ROUTE_ID = "routes/app" as const;
 
@@ -36,6 +37,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
   } catch (_err) {
     hasActiveSub = false;
   }
+
+  // Initial-Sync: Subscription status to metafield for Theme App Extensions
+  try {
+    const shopResponse = await admin.graphql(`#graphql
+      query getShop {
+        shop {
+          id
+        }
+      }
+    `);
+    const shopData = await shopResponse.json();
+    const shopId = shopData.data?.shop?.id;
+    
+    if (shopId) {
+      await syncSubscriptionStatusToMetafield(admin, shopId);
+    }
+  } catch (error) {
+    console.error("Failed to sync subscription status to metafield:", error);
+    // Don't fail the entire request if metafield sync fails
+  }
   
   const locale = getLocale(request);
   return json(
@@ -44,6 +65,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       polarisTranslations: POLARIS_LOCALES[locale],
       shop: session.shop,
       hasActiveSub,
+      // Expose debug UI flags to client (for gating debug components)
+      showDebugUi: process.env.TIMEDIFY_SHOW_DEBUG_UI === "true",
+      debugShops: (process.env.TIMEDIFY_DEBUG_SHOPS || "").split(",").map((s) => s.trim()).filter(Boolean),
     },
     { headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" } }
   );

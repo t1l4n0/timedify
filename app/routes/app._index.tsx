@@ -1,4 +1,4 @@
-import { useRouteLoaderData } from "@remix-run/react";
+import { useRouteLoaderData, useFetcher } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -9,6 +9,9 @@ import {
   VideoThumbnail,
   Modal,
   Banner,
+  Collapsible,
+  Badge,
+  Spinner,
 } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
@@ -16,11 +19,16 @@ import { APP_ROUTE_ID } from "./app";
 import { useCallback, useState } from "react";
 
 export default function Index() {
-  const { hasActiveSub, apiKey } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
+  const { hasActiveSub, apiKey, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
     hasActiveSub: boolean;
+    showDebugUi?: boolean;
+    debugShops?: string[];
+    shop: string;
   };
   const shopify = useAppBridge();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const syncFetcher = useFetcher();
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -75,6 +83,13 @@ export default function Index() {
     [apiKey, shopify]
   );
 
+  const handleSyncSubscription = useCallback(() => {
+    syncFetcher.load('/api/sync-subscription');
+  }, [syncFetcher]);
+
+  const syncData = syncFetcher.data as any;
+  const isSyncing = syncFetcher.state === 'loading';
+
   return (
     <Page title="Timedify - Time-Controlled Content">
       <Layout>
@@ -95,6 +110,133 @@ export default function Index() {
           </Banner>
         </Layout.Section>
 
+        {(showDebugUi || (debugShops && debugShops.includes(shop))) && (
+        <Layout.Section>
+          <Card>
+            <div style={{ padding: "1rem" }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                <div>
+                  <Text as="h3" variant="headingMd">🔧 Debug & Sync</Text>
+                  <div style={{ color: '#6d7175' }}>
+                    <Text as="p" variant="bodyMd">
+                      Sync subscription status to metafield for theme extensions
+                    </Text>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button 
+                    onClick={handleSyncSubscription}
+                    loading={isSyncing}
+                    disabled={isSyncing}
+                  >
+                    {isSyncing ? 'Syncing...' : '🔄 Sync Now'}
+                  </Button>
+                  <Button 
+                    onClick={() => setShowDebugInfo(!showDebugInfo)}
+                    variant="tertiary"
+                  >
+                    {showDebugInfo ? 'Hide' : 'Show'} Debug Info
+                  </Button>
+                </div>
+              </div>
+
+              {syncData && (
+                <div style={{ marginTop: "1rem" }}>
+                  <Banner
+                    title={syncData.success ? 'Sync Successful' : 'Sync Failed'}
+                    tone={syncData.success ? 'success' : 'critical'}
+                  >
+                    <p>
+                      {syncData.success 
+                        ? `Metafield synced successfully at ${syncData.timestamp}`
+                        : `Error: ${syncData.error}`
+                      }
+                    </p>
+                  </Banner>
+                </div>
+              )}
+
+              <Collapsible
+                open={showDebugInfo}
+                id="debug-info"
+                transition={{ duration: '200ms', timingFunction: 'ease-in-out' }}
+              >
+                <div style={{ marginTop: "1rem", padding: "1rem", backgroundColor: "#f6f6f7", borderRadius: "4px" }}>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <Text as="h4" variant="headingSm">
+                    Debug Information
+                    </Text>
+                  </div>
+                  
+                  {syncData ? (
+                    <div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div>
+                          <Text as="span" variant="bodyMd" fontWeight="semibold">Shop:</Text>
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            <Text as="span" variant="bodyMd">
+                              {syncData.shop?.name} ({syncData.shop?.domain})
+                            </Text>
+                          </span>
+                        </div>
+                        
+                        <div>
+                          <Text as="span" variant="bodyMd" fontWeight="semibold">Subscription Status:</Text>
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            <Badge 
+                              tone={syncData.subscription?.hasActiveSubscription ? 'success' : 'warning'}
+                            >
+                              {syncData.subscription?.hasActiveSubscription ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </span>
+                        </div>
+                        
+                        <div>
+                          <Text as="span" variant="bodyMd" fontWeight="semibold">Metafield Value:</Text>
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            <Text as="span" variant="bodyMd">
+                              {syncData.metafield?.current?.value || 'Not set'}
+                            </Text>
+                          </span>
+                        </div>
+                        
+                        <div>
+                          <Text as="span" variant="bodyMd" fontWeight="semibold">Metafield ID:</Text>
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            <Text as="span" variant="bodyMd">
+                              {syncData.metafield?.current?.id || 'N/A'}
+                            </Text>
+                          </span>
+                        </div>
+                        
+                        {syncData.subscription?.subscriptions?.length > 0 && (
+                          <div>
+                            <Text as="span" variant="bodyMd" fontWeight="semibold">Subscriptions:</Text>
+                            <div style={{ marginTop: "0.25rem" }}>
+                              {syncData.subscription.subscriptions.map((sub: any, index: number) => (
+                                <div key={index} style={{ fontSize: "12px", color: "#6d7175" }}>
+                                  {sub.name} - {sub.status} (Ends: {sub.currentPeriodEnd})
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ color: '#6d7175' }}>
+                      <Text as="p" variant="bodyMd">
+                        Click "Sync Now" to see debug information
+                      </Text>
+                    </div>
+                  )}
+                </div>
+              </Collapsible>
+            </div>
+          </Card>
+        </Layout.Section>
+        )}
+
         <Layout.Section>
           <MediaCard
             title="Timedify – How it works"
@@ -113,7 +255,7 @@ export default function Index() {
           <Card>
             <div style={{ padding: "1rem" }}>
               <div style={{ marginBottom: "1.5rem" }}>
-                <Text as="h3" variant="headingMd" color="success">
+                <Text as="h3" variant="headingMd">
                   Welcome to Timedify
                 </Text>
                 <div style={{ marginTop: "0.5rem" }}>

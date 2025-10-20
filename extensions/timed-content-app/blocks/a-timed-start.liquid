@@ -3,6 +3,19 @@
   This block marks the beginning of time-controlled content
 {% endcomment %}
 
+{% comment %}Check subscription status first{% endcomment %}
+{% render 'timedify-subscription-check' %}
+
+{% liquid
+  assign subscription_active = shop.metafields.timedify.subscription_active.value | default: false
+  if subscription_active == 'true' or subscription_active == true or subscription_active == 1
+    assign timedify_should_load = true
+  else
+    assign timedify_should_load = false
+  endif
+%}
+
+{% if timedify_should_load %}
 {% liquid
   assign start_date = block.settings.start_date | split: '.'
   assign start_time = block.settings.start_time | default: '00:00'
@@ -23,6 +36,12 @@
     assign should_show = true
   endif
 %}
+
+{% if request.design_mode %}
+<style>
+.timedify-editor-spacing { margin: 32px 0; }
+</style>
+{% endif %}
 
 <style>
 .ts-hidden { 
@@ -166,6 +185,7 @@
 }
 </style>
 
+{% if request.design_mode %}<div class="timedify-editor-spacing">{% endif %}
 <div id="timed-sections-start-{{ block.id }}"
      class="timed-sections-start"
      data-start-datetime="{% if block.settings.start_date %}{{ block.settings.start_date }} {{ block.settings.start_time | default: '00:00' }}{% endif %}"
@@ -218,8 +238,16 @@
      data-should-show="{{ should_show }}">
   <!-- Content will be placed here by JavaScript -->
 </div>
+{% if request.design_mode %}</div>{% endif %}
 
-<script src="{{ 'timed-sections.js' | asset_url }}" defer></script>
+{%- comment -%} Script wird zentral im Snippet `timedify-subscription-check` geladen, um Doppel-Laden zu vermeiden {%- endcomment -%}
+{% elsif request.design_mode %}
+  <div class="timedify-editor-spacing">
+  <div class="ts-marker" style="padding:12px;border:1px solid #dc3545;border-radius:4px;background:#fff5f5;font-size:12px;">
+    Timedify: Aktives Abo erforderlich. Der Start-Block ist deaktiviert.
+  </div>
+  </div>
+{% endif %}
 
 {% schema %}
 {

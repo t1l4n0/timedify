@@ -1,0 +1,52 @@
+{% comment %}
+  Timedify Subscription Check Snippet
+  Global snippet for checking subscription status and controlling asset loading
+  This snippet should be included at the beginning of each block that requires a subscription
+{% endcomment %}
+
+{% liquid
+  # Read subscription status from shop metafield with multiple fallbacks
+  assign metafield = shop.metafields.timedify.subscription_active
+  assign subscription_active = false
+  
+  # Try different ways to read the metafield value
+  if metafield and metafield.value
+    assign subscription_active = metafield.value
+  elsif metafield and metafield.value == blank
+    # Metafield exists but is empty/null
+    assign subscription_active = false
+  else
+    # Metafield doesn't exist yet - assume no subscription for safety
+    assign subscription_active = false
+  endif
+  
+  # Convert string values to boolean for comparison
+  if subscription_active == 'true' or subscription_active == true or subscription_active == 1
+    assign should_load = true
+  else
+    assign should_load = false
+  endif
+%}
+
+{% if request.design_mode and should_load == false %}
+  <div style="
+    padding: 12px; 
+    border: 1px solid #dc3545; 
+    border-radius: 4px; 
+    margin: 10px 0; 
+    background: #fff5f5; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+  ">
+    <div style="color: #dc3545; font-weight: bold; margin-bottom: 4px;">
+      Timedify: Aktives Abo erforderlich. Der Block ist deaktiviert.
+    </div>
+  </div>
+{% endif %}
+
+{% unless should_load %}
+  {% comment %}No output on storefront when subscription is inactive. Debug UI is shown only in Theme Editor above.{% endcomment %}
+{% else %}
+  {% comment %}Active subscription - load assets and allow block functionality{% endcomment %}
+  <script src="{{ 'timed-sections.js' | asset_url }}" defer></script>
+{% endunless %}
