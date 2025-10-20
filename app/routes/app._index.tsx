@@ -122,8 +122,8 @@ export default function Index() {
                 <div style={{ marginTop: "0.5rem" }}>
                   <Text as="p" variant="bodyMd">
                     Timedify provides time-controlled content scheduling for Shopify stores. 
-                    Schedule when content appears and disappears on your product pages, 
-                    collection pages, and throughout your store with precise timing control.
+                    Schedule when content appears and disappears on your homepages, 
+                    product pages, collection pages, and throughout your store with precise timing control.
                   </Text>
                 </div>
               </div>
