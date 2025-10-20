@@ -115,7 +115,7 @@ export default function Index() {
         <Layout.Section>
           <Card>
             <div style={{ padding: "1rem" }}>
-              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <div style={{ marginBottom: "1.5rem" }}>
                 <Text as="h2" variant="headingLg" color="success">
                   Welcome to Timedify
                 </Text>
