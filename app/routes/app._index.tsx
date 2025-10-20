@@ -79,6 +79,23 @@ export default function Index() {
     <Page title="Timedify - Time-Controlled Content">
       <Layout>
         <Layout.Section>
+          <Card>
+            <div style={{ padding: "1.5rem", textAlign: "center" }}>
+              <Text as="h2" variant="headingLg" color="success">
+                Welcome to Timedify
+              </Text>
+              <div style={{ marginTop: "1rem" }}>
+                <Text as="p" variant="bodyLg">
+                  Timedify provides time-controlled content scheduling for Shopify stores. 
+                  Schedule when content appears and disappears on your product pages, 
+                  collection pages, and throughout your store with precise timing control.
+                </Text>
+              </div>
+            </div>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
           <Banner
             title={hasActiveSub ? 'Subscription active' : 'No active subscription'}
             tone={hasActiveSub ? 'success' : 'warning'}
