@@ -82,17 +82,14 @@ export default function Index() {
           <Banner
             title={hasActiveSub ? 'Subscription active' : 'No active subscription'}
             tone={hasActiveSub ? 'success' : 'warning'}
-            action={hasActiveSub ? {
-              content: '🎨 Go to Theme Editor',
-              onAction: () => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection'),
-            } : {
+            action={hasActiveSub ? undefined : {
               content: '📋 View Plans',
               onAction: () => goToAdmin('/charges/timed-content-app/pricing_plans'),
             }}
           >
             <p>
               {hasActiveSub
-                ? 'You can use all app features.'
+                ? 'You can use all app features: time-controlled content blocks, multiple time windows, and automatic content hiding.'
                 : 'A subscription is required to use all features.'}
             </p>
           </Banner>
