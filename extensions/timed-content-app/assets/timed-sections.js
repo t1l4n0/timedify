@@ -31,7 +31,6 @@
   function computeActive(startEl, endEl) {
     try {
       var startStr = startEl.getAttribute('data-start-datetime');
-      // Endzeit wird nun vom End-Block gelesen
       var endStr = endEl ? endEl.getAttribute('data-end-datetime') : null;
       
       if (!startStr && !endStr) return true; // No dates set = always visible
@@ -40,11 +39,12 @@
       var endAt = endStr ? parseGermanDate(endStr) : null;
       var now = new Date();
       
-    if (startAt && now < startAt) return false; // Before start time
-    if (endAt && now > endAt) return false;     // After end time
+      if (startAt && now < startAt) return false; // Before start time
+      if (endAt && now > endAt) return false;     // After end time
       
       return true;
     } catch (e) {
+      console.error('TimedContent: Error computing active state:', e);
       return true; // Default to visible on error
     }
   }

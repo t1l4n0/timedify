@@ -4,18 +4,37 @@
 {% endcomment %}
 
 {% comment %}Check subscription status first{% endcomment %}
-{% render 'timedify-subscription-check' %}
-
 {% liquid
-  assign subscription_active = shop.metafields.timedify.subscription_active.value | default: false
-  if subscription_active == 'true' or subscription_active == true or subscription_active == 1
-    assign timedify_should_load = true
+  # Read subscription status from shop metafield
+  assign metafield = shop.metafields.timedify.subscription_active
+  assign subscription_active = false
+  
+  # Try different ways to read the metafield value
+  if metafield and metafield.value
+    assign subscription_active = metafield.value
+  elsif metafield and metafield.value == blank
+    assign subscription_active = false
   else
-    assign timedify_should_load = false
+    # Metafield doesn't exist yet - assume active to allow testing
+    assign subscription_active = true
+  endif
+  
+  # Convert to boolean
+  if subscription_active == 'true' or subscription_active == true or subscription_active == 1
+    assign should_load = true
+  else
+    assign should_load = false
   endif
 %}
 
-{% if timedify_should_load %}
+{% if request.design_mode and should_load == false %}
+  <div style="padding:12px;border:1px solid #ffc107;border-radius:4px;margin:10px 0;background:#fff8e1;font-size:12px;">
+    <div style="color:#856404;font-weight:bold;">⚠️ Active subscription required</div>
+    <div style="color:#856404;font-size:11px;">Activate Timedify subscription to use this block.</div>
+  </div>
+{% endif %}
+
+{% if should_load %}
 {% liquid
   assign start_date = block.settings.start_date | split: '.'
   assign start_time = block.settings.start_time | default: '00:00'
@@ -31,6 +50,7 @@
   elsif now >= start_seconds
     assign should_show = true
   endif
+  
 %}
 
 {% if request.design_mode %}
@@ -91,6 +111,7 @@
           Always visible (no dates set)
         </div>
       {% endif %}
+      
     </div>
   </div>
   {% else %}
@@ -119,15 +140,24 @@
 {%- comment -%} Script wird zentral im Snippet `timedify-subscription-check` geladen, um Doppel-Laden zu vermeiden {%- endcomment -%}
 {% elsif request.design_mode %}
   <div class="timedify-editor-spacing">
-  <div class="ts-marker" style="padding:12px;border:1px solid #dc3545;border-radius:4px;background:#fff5f5;font-size:12px;">
-    Timedify: Aktives Abo erforderlich. Der Start-Block ist deaktiviert.
+  <div class="ts-marker" style="padding:12px;border:1px solid #ffc107;border-radius:4px;background:#fff8e1;font-size:12px;">
+    <div style="color: #856404; font-weight: bold; margin-bottom: 4px;">
+      ⚠️ Timedify: Active subscription required
+    </div>
+    <div style="color: #856404; font-size: 11px;">
+      This start block is disabled. Please activate your Timedify subscription to use timed content features.
+    </div>
   </div>
   </div>
 {% endif %}
 
+{% if should_load %}
+  <script src="{{ 'timed-sections.js' | asset_url }}" defer></script>
+{% endif %}
+
 {% schema %}
 {
-  "name": "1. Timed Content: Start",
+  "name": "⏰ 1. Timed Content: Start",
   "target": "section",
   "tag": "section",
   "class": "section",
@@ -149,7 +179,7 @@
       "label": "Start Time",
       "placeholder": "09:00",
       "default": "00:00"
-    }
+    },
   ]
 }
 {% endschema %}
