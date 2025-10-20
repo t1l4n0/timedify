@@ -20,46 +20,7 @@
 </style>
 {% endif %}
 <style>
-/* Hidden/Visible state CSS */
-.ts-hidden { 
-  display: none !important; 
-  visibility: hidden !important; 
-  opacity: 0 !important; 
-  position: absolute !important; 
-  left: -9999px !important; 
-  top: -9999px !important; 
-  width: 0 !important; 
-  height: 0 !important; 
-  overflow: hidden !important; 
-  pointer-events: none !important;
-  z-index: -9999 !important;
-}
-
-.ts-visible { 
-  display: block !important; 
-  visibility: visible !important; 
-  opacity: 1 !important; 
-  position: static !important; 
-  left: auto !important; 
-  top: auto !important; 
-  width: auto !important; 
-  height: auto !important; 
-  overflow: visible !important; 
-  pointer-events: auto !important;
-  z-index: auto !important;
-}
-
-.timed-sections-end {
-  max-width: 400px;
-  margin: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  /* Override any parent container spacing */
-  transform: translateX(0) !important;
-  left: 0 !important;
-  position: relative !important;
-}
+.ts-hidden { display: none !important; }
 
 .ts-end-marker {
   padding: 12px;
@@ -75,116 +36,34 @@
   transform: translateX(0) !important;
   left: 0 !important;
 }
-
-/* Override any section-level spacing */
-.shopify-section .timed-sections-end,
-.section .timed-sections-end,
-[data-section-id] .timed-sections-end {
-  margin: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-}
-
-/* Only remove external spacing, keep internal padding */
-.timed-sections-end {
-  margin: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-}
-
-/* Keep internal padding for content */
-.ts-end-marker {
-  padding: 12px !important;
-  margin: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-}
-
-/* UNIVERSAL theme overrides - work with ANY theme */
-[class*="section"] .timed-sections-end,
-[class*="Section"] .timed-sections-end,
-[class*="block"] .timed-sections-end,
-[class*="Block"] .timed-sections-end,
-[class*="content"] .timed-sections-end,
-[class*="Content"] .timed-sections-end,
-[id*="section"] .timed-sections-end,
-[id*="Section"] .timed-sections-end,
-[id*="block"] .timed-sections-end,
-[id*="Block"] .timed-sections-end,
-[id*="content"] .timed-sections-end,
-[id*="Content"] .timed-sections-end,
-[data-section-id] .timed-sections-end,
-[data-block-id] .timed-sections-end,
-.shopify-section .timed-sections-end,
-.section .timed-sections-end,
-.timed-sections-end {
-  margin: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-  position: relative !important;
-}
-
-/* Force left alignment for the entire block structure - UNIVERSAL */
-.timed-sections-end,
-.timed-sections-end > *,
-.timed-sections-end .ts-end-marker,
-.timed-sections-end [class*="marker"],
-.timed-sections-end [class*="Marker"] {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-}
-
-/* Target the red dashed border container specifically */
-.shopify-section .timed-sections-end,
-.section .timed-sections-end,
-[data-section-id] .timed-sections-end,
-.timed-sections-end {
-  margin: 0 !important;
-  padding: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-  position: relative !important;
-}
-
-/* Force left alignment for the entire block structure */
-.timed-sections-end,
-.timed-sections-end > *,
-.timed-sections-end .ts-end-marker {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  transform: translateX(0) !important;
-  left: 0 !important;
-}
 </style>
 
 {% if request.design_mode %}<div class="timedify-editor-spacing">{% endif %}
 <div id="timed-sections-end-{{ block.id }}"
      class="timed-sections-end"
+     data-end-datetime="{% if block.settings.end_date %}{{ block.settings.end_date }} {{ block.settings.end_time | default: '23:59' }}{% endif %}"
      style="{% unless request.design_mode %}display:none!important;{% endunless %}">
   {% if request.design_mode %}
   <div class="ts-end-marker">
     <div style="color: #dc3545; font-weight: 600; text-align: center;">
       Timed Content ends here.
     </div>
+    {% if block.settings.end_date %}
+      <div class="ts-display-only" style="text-align: center; margin-top: 6px;">
+        End: {{ block.settings.end_date }}{% if block.settings.end_time and block.settings.end_time != blank and block.settings.end_time != '' and block.settings.end_time != ' ' %} {{ block.settings.end_time }}{% else %} 23:59{% endif %}
+      </div>
+    {% endif %}
   </div>
   {% else %}
   <!-- Display only on storefront -->
   <div style="color: #dc3545; font-weight: 600; text-align: center;">
     Timed Content ends here.
   </div>
+  {% if block.settings.end_date %}
+    <div class="ts-display-only" style="text-align: center; margin-top: 6px;">
+      End: {{ block.settings.end_date }}{% if block.settings.end_time and block.settings.end_time != blank and block.settings.end_time != '' and block.settings.end_time != ' ' %} {{ block.settings.end_time }}{% else %} 23:59{% endif %}
+    </div>
+  {% endif %}
   {% endif %}
 </div>
 {% if request.design_mode %}</div>{% endif %}
@@ -203,7 +82,24 @@
   "tag": "section",
   "class": "section",
   "settings": [
-    
+    {
+      "type": "header",
+      "content": "⏰ End Time Settings"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End Date",
+      "placeholder": "DD.MM.YYYY",
+      "default": "31.12.2025"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End Time",
+      "placeholder": "18:00",
+      "default": "23:59"
+    }
   ]
 }
 {% endschema %}

@@ -28,10 +28,11 @@
   }
 
   // Compute if content should be active based on start/end times
-  function computeActive(startEl) {
+  function computeActive(startEl, endEl) {
     try {
       var startStr = startEl.getAttribute('data-start-datetime');
-      var endStr = startEl.getAttribute('data-end-datetime');
+      // Endzeit wird nun vom End-Block gelesen
+      var endStr = endEl ? endEl.getAttribute('data-end-datetime') : null;
       
       if (!startStr && !endStr) return true; // No dates set = always visible
       
@@ -65,57 +66,7 @@
     return null;
   }
 
-  // Alternative method to find elements between start and end
-  function findElementsBetween(startEl, endEl) {
-    if (!startEl || !endEl) return [];
-    
-    var result = [];
-    
-    // Method 1: Look for elements with data attributes that might be content
-    var potentialContent = document.querySelectorAll('[data-section-id], [id^="shopify-section-"], .shopify-section, [class*="section"], [class*="block"]');
-    
-    for (var i = 0; i < potentialContent.length; i++) {
-      var el = potentialContent[i];
-      if (el === startEl || el === endEl) continue;
-      
-      // Check if this element is between start and end
-      var startPos = startEl.compareDocumentPosition(el);
-      var endPos = endEl.compareDocumentPosition(el);
-      
-      // Element should be after start (4) and before end (2)
-      if ((startPos & 4) && (endPos & 2)) {
-        result.push(el);
-      }
-    }
-    
-    // Method 2: Look for common content containers
-    var contentSelectors = [
-      'div[class*="content"]',
-      'div[class*="Content"]', 
-      'section[class*="content"]',
-      'section[class*="Content"]',
-      'div[class*="block"]',
-      'div[class*="Block"]',
-      'div[class*="section"]',
-      'div[class*="Section"]'
-    ];
-    
-    for (var j = 0; j < contentSelectors.length; j++) {
-      var contentElements = document.querySelectorAll(contentSelectors[j]);
-      for (var k = 0; k < contentElements.length; k++) {
-        var contentEl = contentElements[k];
-        if (contentEl === startEl || contentEl === endEl || result.indexOf(contentEl) !== -1) continue;
-        
-        var startPos = startEl.compareDocumentPosition(contentEl);
-        var endPos = endEl.compareDocumentPosition(contentEl);
-        
-        if ((startPos & 4) && (endPos & 2)) {
-          result.push(contentEl);
-        }
-      }
-    }
-    return result;
-  }
+  // Removed: alternative global search to avoid interfering with theme layout
 
   // Collect all elements between start and end blocks
   function collectRangeElements(startEl, endEl) {
@@ -143,28 +94,22 @@
 
   // Apply visibility state to elements
   function applyState(elements, active) {
-    
     for (var i = 0; i < elements.length; i++) {
       var el = elements[i];
       if (!el || !el.classList) continue;
-      
       try {
         if (active) {
           el.classList.remove('ts-hidden');
-          el.classList.add('ts-visible');
-          el.style.removeProperty('display');
-          el.style.removeProperty('visibility');
-          el.style.removeProperty('opacity');
+          el.removeAttribute('hidden');
+          el.setAttribute('aria-hidden', 'false');
         } else {
           el.classList.add('ts-hidden');
-          el.classList.remove('ts-visible');
-          el.style.setProperty('display', 'none', 'important');
-          el.style.setProperty('visibility', 'hidden', 'important');
-          el.style.setProperty('opacity', '0', 'important');
+          el.setAttribute('hidden', '');
+          el.setAttribute('aria-hidden', 'true');
         }
-        } catch (e) {
-          // Ignore errors while applying state
-        }
+      } catch (e) {
+        // no-op
+      }
     }
   }
 
@@ -179,16 +124,11 @@
     // Try original method first
     var controlled = collectRangeElements(startEl, endEl);
     
-    // OPTIMIZED: Only try alternative method if no elements found AND we're in live mode
-    if (controlled.length === 0 && (!window.Shopify || !window.Shopify.designMode)) {
-      var alternativeElements = findElementsBetween(startEl, endEl);
-      controlled = alternativeElements;
-    }
+    // No alternative global search; only operate on direct siblings to avoid layout interference
     
-      var active = computeActive(startEl);
-
-      applyState(controlled, active);
-    }
+    var active = computeActive(startEl, endEl);
+    applyState(controlled, active);
+  }
 
   // Main refresh function
   function refresh() {
@@ -236,14 +176,17 @@
     }
     
     var run = function() {
+      // In Theme Editor never hide content; only show markers/warnings
+      if (window.Shopify && window.Shopify.designMode) return;
       refresh();
     };
     
     run(); // Initial run
     
-    // FAST REFRESH: Check every 2 seconds for immediate response
-    var interval = window.Shopify && window.Shopify.designMode ? 10000 : 2000; // 10s for editor, 2s for live
-    setInterval(run, interval);
+    // Refresh only in live mode; no periodic hiding in editor
+    if (!window.Shopify || !window.Shopify.designMode) {
+      setInterval(run, 2000);
+    }
     
     // Observe DOM changes in live mode only
     if (!window.Shopify || !window.Shopify.designMode) {
