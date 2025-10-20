@@ -68,26 +68,63 @@
 
   // Removed: alternative global search to avoid interfering with theme layout
 
-  // Collect all elements between start and end blocks
+  // Collect all elements between the app-block sections of start and end
   function collectRangeElements(startEl, endEl) {
-    if (!endEl) {
-      return [];
-    }
-    
-    var result = [];
-    var cursor = startEl.nextElementSibling;
-    var count = 0;
-    
-    while (cursor && cursor !== endEl && count < 100) { // Safety limit
-      // Skip our own content containers and already hidden elements
-      if (cursor.classList && 
-          !cursor.classList.contains('timed-sections-content') &&
-          !cursor.classList.contains('ts-hidden') &&
-          cursor !== startEl) {
-        result.push(cursor);
+    if (!startEl || !endEl) return [];
+
+    // Find enclosing Shopify app-block sections for both markers
+    var startBlock = startEl.closest('.shopify-app-block.section') || startEl.parentElement;
+    var endBlock = endEl.closest('.shopify-app-block.section') || endEl.parentElement;
+    if (!startBlock || !endBlock) return [];
+
+    // If both are under the same parent, traverse siblings between them
+    if (startBlock.parentElement && startBlock.parentElement === endBlock.parentElement) {
+      var parent = startBlock.parentElement;
+      var items = [];
+      var cursor = startBlock.nextElementSibling;
+      var guard = 0;
+      while (cursor && cursor !== endBlock && guard < 1000) {
+        // Do not include the start/end blocks themselves or our own helper containers
+        if (cursor !== startBlock && cursor !== endBlock) {
+          items.push(cursor);
+        }
+        cursor = cursor.nextElementSibling;
+        guard++;
       }
-      cursor = cursor.nextElementSibling;
-      count++;
+      return items;
+    }
+
+    // Fallback: collect nodes that are after startBlock and before endBlock in document order,
+    // but only include elements sharing a nearest common ancestor to avoid global grabs
+    var result = [];
+    try {
+      var common = (function(a, b) {
+        var set = new Set();
+        var n = a;
+        while (n) { set.add(n); n = n.parentElement; }
+        var m = b;
+        while (m) { if (set.has(m)) return m; m = m.parentElement; }
+        return document.body;
+      })(startBlock, endBlock);
+
+      // Iterate over children of the common ancestor, capturing the span between blocks
+      var capturing = false;
+      var guard2 = 0;
+      for (var child = common.firstElementChild; child && guard2 < 5000; child = child.nextElementSibling) {
+        if (child === startBlock) {
+          capturing = true;
+          continue;
+        }
+        if (child === endBlock) {
+          break;
+        }
+        if (capturing) {
+          result.push(child);
+        }
+        guard2++;
+      }
+    } catch (e) {
+      // ignore
     }
     return result;
   }
