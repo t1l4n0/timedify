@@ -3,7 +3,7 @@
 client_id = "e6e56f8533bfb028465f4cc4dfda86f9"
 name = "Timedify"
 handle = "timed-content-app"
-application_url = "https://timedify.fly.dev/app"
+application_url = "https://timedify.fly.dev"
 embedded = true
 
 [build]
