@@ -335,6 +335,31 @@ export default function Index() {
             </div>
           </Card>
         </Layout.Section>
+
+        {/* Privacy Policy Section */}
+        <Layout.Section>
+          <Card>
+            <div style={{ padding: "1rem", textAlign: "center" }}>
+              <Text as="h3" variant="headingMd">Legal & Privacy</Text>
+              <div style={{ marginBottom: "1rem" }}>
+                <Text as="p" variant="bodyMd">
+                  We are committed to protecting your privacy and being transparent about data usage.
+                </Text>
+              </div>
+              <Button
+                variant="tertiary"
+                onClick={() => window.open('/app/privacy', '_self')}
+              >
+                📄 Privacy Policy
+              </Button>
+              <div style={{ marginTop: "0.5rem", color: "#6d7175" }}>
+                <Text as="p" variant="bodySm">
+                  Learn how we handle your data
+                </Text>
+              </div>
+            </div>
+          </Card>
+        </Layout.Section>
       </Layout>
 
       <Modal
