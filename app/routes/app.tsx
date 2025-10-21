@@ -1,7 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useRouteError, isRouteErrorResponse, useRouteLoaderData } from "@remix-run/react";
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
-import { createApp } from "@shopify/app-bridge";
 import { authenticate } from "~/shopify.server";
 import type { SerializeFrom } from "@remix-run/node";
 import { Page, Layout, Card, Text, Banner } from "@shopify/polaris";
@@ -80,26 +79,9 @@ export default function AppLayout() {
   const rootData = useRouteLoaderData("root") as RootLoaderData;
   const { host } = rootData;
   
-  // Nur App Bridge initialisieren wenn alle erforderlichen Parameter vorhanden sind
-  const shouldInitializeAppBridge = apiKey && shop && host;
+  // App Bridge wird automatisch via CDN-Script in root.tsx initialisiert
   
-  // App Bridge global initialisieren (nur einmal)
-  if (typeof window !== "undefined" && shouldInitializeAppBridge) {
-    try {
-      // Prüfe ob App Bridge bereits initialisiert wurde
-      if (!(window as any).shopify) {
-        createApp({
-          apiKey,
-          host,
-          forceRedirect: true,
-        });
-      }
-    } catch (error) {
-      console.warn("Failed to initialize App Bridge:", error);
-    }
-  }
-  
-  if (!shouldInitializeAppBridge) {
+  if (!apiKey || !shop || !host) {
     return (
       <PolarisProvider i18n={polarisTranslations}>
         <Page title="Timedify - Configuration Error">
@@ -153,23 +135,7 @@ export function ErrorBoundary() {
     errorDetails = error.stack || "";
   }
 
-  const shouldInitializeAppBridge = apiKey && host;
-
-  // App Bridge global initialisieren (nur einmal)
-  if (typeof window !== "undefined" && shouldInitializeAppBridge) {
-    try {
-      // Prüfe ob App Bridge bereits initialisiert wurde
-      if (!(window as any).shopify) {
-        createApp({
-          apiKey,
-          host,
-          forceRedirect: true,
-        });
-      }
-    } catch (error) {
-      console.warn("Failed to initialize App Bridge:", error);
-    }
-  }
+  // App Bridge wird automatisch via CDN-Script in root.tsx initialisiert
 
   return (
     <PolarisProvider i18n={polarisTranslations}>

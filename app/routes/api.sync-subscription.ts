@@ -1,11 +1,17 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
+import { validateSessionToken } from "~/utils/validateSessionToken.server";
 
-// Admin-geschützter Endpoint; synchronisiert timedify.subscription_active anhand aktiver Subscriptions
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
+// Session Token-geschützter Endpoint; synchronisiert timedify.subscription_active anhand aktiver Subscriptions
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
+    // Session Token validieren
+    const payload = await validateSessionToken(request);
+    const shop = payload.dest.replace("https://", "");
+    
+    // Admin-Client mit gespeichertem Access Token holen
+    const { admin } = await authenticate.admin(request);
     // Shop-ID holen
     const shopResp = await admin.graphql(`#graphql
       query getShopId { shop { id } }
@@ -39,10 +45,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       });
     }
 
-    return json({ ok: true, active: isActive }, { status: 200 });
+    return json({ 
+      success: true, 
+      active: isActive,
+      shop: { name: shop, domain: shop },
+      subscription: { hasActiveSubscription: isActive },
+      metafield: { current: { value: isActive ? "true" : "false" } },
+      timestamp: new Date().toISOString()
+    }, { status: 200 });
   } catch (error) {
-    return json({ ok: false, error: (error as Error).message }, { status: 200 });
+    console.error("Sync subscription error:", error);
+    return json({ 
+      success: false, 
+      error: (error as Error).message || "Unknown error",
+      timestamp: new Date().toISOString()
+    }, { status: 200 });
   }
 };
 
-export const loader = () => new Response(null, { status: 405 });
+export const action = () => new Response(null, { status: 405 });

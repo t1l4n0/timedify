@@ -1,4 +1,4 @@
-import { useRouteLoaderData, useFetcher } from "@remix-run/react";
+import { useRouteLoaderData } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -17,6 +17,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import type { AppLoaderData } from "./app";
 import { APP_ROUTE_ID } from "./app";
 import { useCallback, useState } from "react";
+import { useAuthenticatedFetch } from "~/utils/authenticatedFetch";
 
 export default function Index() {
   const { hasActiveSub, apiKey, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
@@ -28,7 +29,9 @@ export default function Index() {
   const shopify = useAppBridge();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
-  const syncFetcher = useFetcher();
+  const [syncData, setSyncData] = useState<any>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const authenticatedFetch = useAuthenticatedFetch();
 
   const videoId = 'Tvz61ykCn-I';
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -65,12 +68,20 @@ export default function Index() {
     [shopify]
   );
 
-  const handleSyncSubscription = useCallback(() => {
-    syncFetcher.load('/api/sync-subscription');
-  }, [syncFetcher]);
-
-  const syncData = syncFetcher.data as any;
-  const isSyncing = syncFetcher.state === 'loading';
+  const handleSyncSubscription = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const result = await authenticatedFetch({ 
+        endpoint: '/api/sync-subscription',
+        method: 'GET' 
+      });
+      setSyncData(result);
+    } catch (error) {
+      setSyncData({ success: false, error: (error as Error).message });
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [authenticatedFetch]);
 
   return (
     <Page title="Timedify - Time-Controlled Content">
