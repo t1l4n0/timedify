@@ -348,7 +348,7 @@ export default function Index() {
               </div>
               <Button
                 variant="tertiary"
-                onClick={() => window.open('/app/privacy', '_self')}
+                onClick={() => window.open('/privacy', '_blank')}
               >
                 📄 Privacy Policy
               </Button>
