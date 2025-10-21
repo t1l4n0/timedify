@@ -19,7 +19,7 @@ import { APP_ROUTE_ID } from "./app";
 import { useCallback, useState } from "react";
 
 export default function Index() {
-  const { hasActiveSub, apiKey, extensionUid, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
+  const { hasActiveSub, apiKey, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
     hasActiveSub: boolean;
     showDebugUi?: boolean;
     debugShops?: string[];
@@ -34,53 +34,35 @@ export default function Index() {
   const videoThumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
   const goToAdmin = useCallback(
-    (adminPath: string, addAppBlockId?: string, target?: string) => {
-      let finalPath = adminPath;
-
-      if (adminPath === "/themes/current/editor") {
-        const params = new URLSearchParams();
-
-        if (addAppBlockId) {
-          const blockIdParam = `${extensionUid}/${addAppBlockId}`;
-          params.set("addAppBlockId", blockIdParam);
-          params.set("target", target ?? "newAppsSection");
-          params.set("template", target === "mainSection" ? "product" : "index");
-        }
-
-        const queryString = params.toString();
-        if (queryString) {
-          finalPath = `${adminPath}?${queryString}`;
-        }
-      }
-
+    (adminPath: string) => {
       shopify.toast?.show?.("Opening Shopify admin…");
 
       const fallbackUrl = (() => {
         if (typeof window === "undefined") {
-          return finalPath;
+          return adminPath;
         }
 
         const params = new URLSearchParams(window.location.search);
         const hostParam = params.get("host");
 
         if (!hostParam) {
-          return finalPath;
+          return adminPath;
         }
 
         try {
           const decoded = atob(hostParam);
           const normalizedBase = decoded.startsWith("https://") ? decoded : `https://${decoded}`;
           const base = normalizedBase.replace(/\/$/, "");
-          return `${base}${finalPath.startsWith("/") ? finalPath : `/${finalPath}`}`;
+          return `${base}${adminPath.startsWith("/") ? adminPath : `/${adminPath}`}`;
         } catch (error) {
           console.warn("Failed to decode host parameter", error);
-          return finalPath;
+          return adminPath;
         }
       })();
 
       window.open(fallbackUrl, "_parent");
     },
-    [extensionUid, shopify]
+    [shopify]
   );
 
   const handleSyncSubscription = useCallback(() => {
@@ -290,14 +272,15 @@ export default function Index() {
             <div style={{ padding: "1rem" }}>
               <Text as="h3" variant="headingMd">Setup guide</Text>
               <ol style={{ marginLeft: '1.5rem' }}>
-                <li><Text as="span" variant="bodyMd"><strong>Open the Theme Editor:</strong> Click "Go to Theme Editor" below (automatically adds the Start block).</Text></li>
+                <li><Text as="span" variant="bodyMd"><strong>Open the Theme Editor:</strong> Click "Go to Theme Editor" below.</Text></li>
+                <li><Text as="span" variant="bodyMd"><strong>Add Start block:</strong> Manually add "⏰ 1. Timed Content: Start" to your section.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Place your content:</strong> Add products, text, images, videos, buttons, etc. after the start block.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Add End block:</strong> Manually add "⏰ 2. Timed Content: End" after your content.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Configure timing:</strong> Set start and end date/time in the Start block settings.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Save & test:</strong> Save and test on your storefront.</Text></li>
               </ol>
               <div style={{ marginTop: '1rem' }}>
-                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', '1-timed-content-start', 'newAppsSection')}>
+                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor')}>
                   🎨 Go to Theme Editor
                 </Button>
               </div>
