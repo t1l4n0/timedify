@@ -59,9 +59,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   
   const locale = getLocale(request);
+  
+  // Extension UID für Theme Editor Deep Links
+  const EXTENSION_UID = "e71f3cea-b943-9c0d-edc0-3ae57b6cc5cd959a8bd0";
+  
   return json(
     {
       apiKey,
+      extensionUid: EXTENSION_UID,
       polarisTranslations: POLARIS_LOCALES[locale],
       shop: session.shop,
       hasActiveSub,

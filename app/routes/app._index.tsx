@@ -19,7 +19,7 @@ import { APP_ROUTE_ID } from "./app";
 import { useCallback, useState } from "react";
 
 export default function Index() {
-  const { hasActiveSub, apiKey, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
+  const { hasActiveSub, apiKey, extensionUid, showDebugUi, debugShops, shop } = useRouteLoaderData(APP_ROUTE_ID) as AppLoaderData & {
     hasActiveSub: boolean;
     showDebugUi?: boolean;
     debugShops?: string[];
@@ -41,7 +41,7 @@ export default function Index() {
         const params = new URLSearchParams();
 
         if (addAppBlockId) {
-          const blockIdParam = `${apiKey}/${addAppBlockId}`;
+          const blockIdParam = `${extensionUid}/${addAppBlockId}`;
           params.set("addAppBlockId", blockIdParam);
           params.set("target", target ?? "newAppsSection");
           params.set("template", target === "mainSection" ? "product" : "index");
@@ -80,7 +80,7 @@ export default function Index() {
 
       window.open(fallbackUrl, "_parent");
     },
-    [apiKey, shopify]
+    [extensionUid, shopify]
   );
 
   const handleSyncSubscription = useCallback(() => {
