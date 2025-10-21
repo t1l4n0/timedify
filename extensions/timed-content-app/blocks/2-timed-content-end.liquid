@@ -14,8 +14,8 @@
   elsif metafield and metafield.value == blank
     assign subscription_active = false
   else
-    # Metafield doesn't exist yet - assume active to allow testing
-    assign subscription_active = true
+    # Metafield doesn't exist yet - assume inactive for security
+    assign subscription_active = false
   endif
   
   # Convert to boolean
@@ -48,13 +48,7 @@
   border-radius: 6px;
   background: rgba(220, 53, 69, 0.06);
   font-size: 14px;
-  text-align: left;
-  margin: 0 !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  /* Override any parent container spacing */
-  transform: translateX(0) !important;
-  left: 0 !important;
+  text-align: center;
 }
 </style>
 
@@ -113,8 +107,6 @@
 {
   "name": "⏰ 2. Timed Content: End",
   "target": "section",
-  "tag": "section",
-  "class": "section",
   "settings": [
     {
       "type": "header",

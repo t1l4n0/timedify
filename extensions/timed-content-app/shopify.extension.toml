@@ -1,3 +1,10 @@
 name = "Timed Content"
 uid = "e71f3cea-b943-9c0d-edc0-3ae57b6cc5cd959a8bd0"
 type = "theme_app_extension"
+
+[capabilities]
+theme_editor_integration = true
+
+[build]
+command = ""
+watch = []

@@ -290,15 +290,14 @@ export default function Index() {
             <div style={{ padding: "1rem" }}>
               <Text as="h3" variant="headingMd">Setup guide</Text>
               <ol style={{ marginLeft: '1.5rem' }}>
-                <li><Text as="span" variant="bodyMd"><strong>Open the Theme Editor:</strong> Online Store → Themes → Customize.</Text></li>
-                <li><Text as="span" variant="bodyMd"><strong>Add Start block:</strong> Add "1. Timed Content: Start" to your section.</Text></li>
-                <li><Text as="span" variant="bodyMd"><strong>Place your content:</strong> Products, text, images, videos, buttons, etc. after the start block.</Text></li>
-                <li><Text as="span" variant="bodyMd"><strong>Add End block:</strong> Add "2. Timed Content: End" after your content.</Text></li>
+                <li><Text as="span" variant="bodyMd"><strong>Open the Theme Editor:</strong> Click "Go to Theme Editor" below (automatically adds the Start block).</Text></li>
+                <li><Text as="span" variant="bodyMd"><strong>Place your content:</strong> Add products, text, images, videos, buttons, etc. after the start block.</Text></li>
+                <li><Text as="span" variant="bodyMd"><strong>Add End block:</strong> Manually add "⏰ 2. Timed Content: End" after your content.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Configure timing:</strong> Set start and end date/time in the Start block settings.</Text></li>
                 <li><Text as="span" variant="bodyMd"><strong>Save & test:</strong> Save and test on your storefront.</Text></li>
               </ol>
               <div style={{ marginTop: '1rem' }}>
-                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', 'a-timed-start', 'newAppsSection')}>
+                <Button variant="primary" onClick={() => goToAdmin('/themes/current/editor', '1-timed-content-start', 'newAppsSection')}>
                   🎨 Go to Theme Editor
                 </Button>
               </div>

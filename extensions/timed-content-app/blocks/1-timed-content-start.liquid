@@ -15,8 +15,8 @@
   elsif metafield and metafield.value == blank
     assign subscription_active = false
   else
-    # Metafield doesn't exist yet - assume active to allow testing
-    assign subscription_active = true
+    # Metafield doesn't exist yet - assume inactive for security
+    assign subscription_active = false
   endif
   
   # Convert to boolean
@@ -159,8 +159,6 @@
 {
   "name": "⏰ 1. Timed Content: Start",
   "target": "section",
-  "tag": "section",
-  "class": "section",
   "settings": [
     {
       "type": "header",
@@ -179,7 +177,7 @@
       "label": "Start Time",
       "placeholder": "09:00",
       "default": "00:00"
-    },
+    }
   ]
 }
 {% endschema %}
