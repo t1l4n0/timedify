@@ -1,10 +1,12 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import { validateSessionToken } from "~/utils/validateSessionToken.server";
 
 // Session Token-geschützter Endpoint; synchronisiert timedify.subscription_active anhand aktiver Subscriptions
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = () => new Response(null, { status: 405 });
+
+export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     // Session Token validieren
     const payload = await validateSessionToken(request);
@@ -28,6 +30,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const isActive = Array.isArray(activeList) && activeList.length > 0;
 
     if (shopId) {
+      const idemKey = globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2);
       await admin.graphql(`#graphql
         mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
           metafieldsSet(metafields: $metafields) { userErrors { field message code } }
@@ -42,6 +45,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
             type: "boolean",
           }],
         },
+        headers: { "Idempotency-Key": idemKey },
       });
     }
 
@@ -62,5 +66,3 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }, { status: 200 });
   }
 };
-
-export const action = () => new Response(null, { status: 405 });

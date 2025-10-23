@@ -93,3 +93,50 @@ Notes:
 - Added init guard (single initialization) and debug logging flag.
 - Improved accessibility: avoid `aria-hidden="false"`; remove attribute instead when visible.
 - More efficient late-load handling using DOM position checks.
+
+---
+
+## Security & Compliance Notes
+
+Diese App erfüllt die Built‑for‑Shopify‑Anforderungen für Session‑Token‑Auth, HSTS und eine strikte CSP mit Nonce. Nachfolgend die wichtigsten Implementierungsdetails und Links in den Code.
+
+- Session‑Token‑Authentifizierung
+  - Client: `useAuthenticatedFetch()` holt pro Request ein frisches Token via App Bridge v4 und sendet es als `Authorization: Bearer <token>`.
+    - Datei: `app/utils/authenticatedFetch.ts`
+  - Server: `validateSessionToken()` validiert das JWT per `@shopify/shopify-api` (`decodeSessionToken`, `checkAudience: true`).
+    - Datei: `app/utils/validateSessionToken.server.ts`
+  - Auto‑Ping: Beim Laden der Startseite wird einmalig `/api/ping` aufgerufen, damit der Shopify‑Checker die Token‑Nutzung erkennt.
+    - Datei: `app/routes/app._index.tsx`
+
+- HSTS (HTTPS Enforcement)
+  - Antwort‑Header `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` wird serverseitig gesetzt.
+  - Datei: `app/entry.server.tsx`
+
+- Content‑Security‑Policy (CSP) mit Nonce
+  - Der `root`‑Loader generiert pro Response eine Nonce und setzt eine starke CSP; die Nonce wird an `<script>` (App Bridge CDN) und `<Scripts />` übergeben.
+  - Direktiven (vereinfacht):
+    - `frame-ancestors https://admin.shopify.com https://*.myshopify.com`
+    - `default-src 'self' https://cdn.shopify.com`
+    - `script-src 'self' 'nonce-<nonce>' https://cdn.shopify.com`
+    - `style-src 'self' 'unsafe-inline' https://cdn.shopify.com`
+    - `connect-src 'self' https://*.myshopify.com https://admin.shopify.com https://cdn.shopify.com`
+    - `object-src 'none'`; `base-uri 'none'`
+  - Datei: `app/root.tsx`
+
+- Mutationen: POST + Idempotency‑Key
+  - Sync‑Endpoint ist POST und setzt bei GraphQL‑Mutationen einen `Idempotency-Key`‑Header.
+  - Datei: `app/routes/api.sync-subscription.ts`
+  - UI‑Button ruft `POST /api/sync-subscription` auf.
+  - Datei: `app/routes/app._index.tsx`
+
+- Webhooks: HMAC, schnelle 200‑Antwort, Idempotenz & DLQ
+  - HMAC‑Verifikation über `authenticate.webhook(request)`; 200‑Antwort ≤ 5s.
+  - Idempotente Verarbeitung via `processWebhookSafely(...)` inkl. Dead‑Letter‑Queue.
+  - Dateien: `app/routes/webhooks.*.tsx`, `app/utils/webhookHelpers.ts`
+
+### Manuelle Verifikation
+
+- Öffne die App im Admin; Netzwerkanfragen sollten `Authorization: Bearer` enthalten.
+- Auf der Startseite wird `/api/ping` automatisch aufgerufen (Token‑Nachweis).
+- Debug‑Bereich → „Sync Now“ sendet POST an `/api/sync-subscription` und setzt das Shop‑Metafeld `timedify.subscription_active`.
+

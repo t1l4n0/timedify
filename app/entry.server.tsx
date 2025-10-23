@@ -34,6 +34,11 @@ export default async function handleRequest(
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set("Content-Type", "text/html");
+          // Enforce HTTPS for browsers (Fly already redirects; header adds HSTS)
+          responseHeaders.set(
+            "Strict-Transport-Security",
+            "max-age=31536000; includeSubDomains; preload"
+          );
           // Strikte Permissions-Policy, um Warnungen zu vermeiden
           responseHeaders.set(
             "Permissions-Policy",

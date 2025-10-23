@@ -19,9 +19,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         // Asynchrone Verarbeitung ohne await → Response sofort zurückgeben
         Promise.resolve().then(async () => {
           try {
-            console.log(`CUSTOMERS/DATA_REQUEST payload for ${shop}:`, JSON.stringify(payload));
-            // GDPR-Compliance: Timedify speichert keine personenbezogenen Kundendaten
-            // Keine Metafields oder App-spezifische Kundendaten vorhanden
+            // Keine PII loggen – nur strukturierte Info
             console.log(`GDPR DATA_REQUEST: No customer data stored by Timedify for ${shop}`);
           } catch (err) {
             console.error(`CUSTOMERS/DATA_REQUEST: processing error for ${shop}`, err);
