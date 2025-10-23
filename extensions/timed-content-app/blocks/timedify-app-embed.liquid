@@ -14,13 +14,23 @@
   /* Scoped pre-hide within a section: content after Start is hidden until End */
   .shopify-section .timed-sections-start ~ * { visibility: hidden !important; }
   .shopify-section .timed-sections-end ~ * { visibility: visible !important; }
+
+  /* Stronger pre-hide using :has() (supported in evergreen browsers) */
+  /* Single-section: hide siblings after start within the same section */
+  .shopify-section:has(.timed-sections-start) .timed-sections-start ~ * { visibility: hidden !important; }
+  .shopify-section:has(.timed-sections-end) .timed-sections-end ~ * { visibility: visible !important; }
+
+  /* Cross-section: hide sections following a section that contains a start marker */
+  .shopify-section:has(.timed-sections-start) ~ .shopify-section { visibility: hidden !important; }
+  /* Re-show sections following a section that contains an end marker */
+  .shopify-section:has(.timed-sections-end) ~ .shopify-section { visibility: visible !important; }
 </style>
 
 {% if section.settings.debug %}
 <script>window.__timedifyDebug = true;</script>
 {% endif %}
 
-<script src="{{ 'timedify-controller.js' | asset_url }}"></script>
+<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
