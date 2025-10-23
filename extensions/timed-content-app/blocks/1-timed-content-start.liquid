@@ -136,6 +136,27 @@
   }
 
 </style>
+<script>
+  (function(){
+    try {
+      var startEl = document.getElementById('timed-sections-start-{{ block.id }}');
+      if (!startEl) return;
+      var startSection = startEl.closest('.shopify-section');
+      var rangeKey = startEl.id;
+      // Cross-section pre-tag: mark following sections until an end marker section
+      var sec = startSection && startSection.nextElementSibling;
+      while (sec && sec.classList && sec.classList.contains('shopify-section')) {
+        if (sec.querySelector('.timed-sections-end')) break;
+        sec.setAttribute('data-timedify-range', rangeKey);
+        sec = sec.nextElementSibling;
+      }
+      // Single-section pre-tag: hide the whole section briefly; controller will show precise targets
+      if (startSection) {
+        startSection.setAttribute('data-timedify-range', rangeKey);
+      }
+    } catch(e) {}
+  })();
+</script>
 <script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
 {% endif %}
 
