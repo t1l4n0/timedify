@@ -1,0 +1,43 @@
+{% comment %}
+  Timedify App Embed: Loads early in <head> to minimize FOUC
+{% endcomment %}
+
+<style>
+  /* Global pre-hide until JS validates timing (reserve layout) */
+  [data-timedify-range] { visibility: hidden !important; }
+
+  /* Hide containers marked by JS as hidden; show when active */
+  .shopify-section[data-timedify-hidden="true"],
+  .shopify-block[data-timedify-hidden="true"] { visibility: hidden !important; }
+
+  .shopify-section[data-timedify-hidden="false"],
+  .shopify-block[data-timedify-hidden="false"],
+  [data-timedify-range][data-timedify-hidden="false"] { visibility: visible !important; }
+
+  /* Pre-hide everything after Start; re-show after End (no layout shift) */
+  .timed-sections-start ~ * { visibility: hidden !important; }
+  .timed-sections-end ~ * { visibility: visible !important; }
+</style>
+
+{% if section.settings.debug %}
+<script>window.__timedifyDebug = true;</script>
+{% endif %}
+
+<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Timedify App Embed",
+  "target": "head",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "debug",
+      "label": "Enable debug logging",
+      "default": false
+    }
+  ]
+}
+{% endschema %}
+
+

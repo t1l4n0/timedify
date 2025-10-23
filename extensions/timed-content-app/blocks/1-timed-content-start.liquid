@@ -102,7 +102,6 @@
 <style>
   /* Hide all content between start and end until JS validates timing */
   [data-timedify-range] {
-    display: none !important;
     visibility: hidden !important;
   }
   
@@ -123,6 +122,15 @@
   /* Generic override for any controlled element once active */
   [data-timedify-range][data-timedify-hidden="false"] {
     display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Pre-hide everything after Start within the same container to reduce FOUC */
+  .timed-sections-start ~ * {
+    visibility: hidden !important;
+  }
+  /* Re-show default content after End marker */
+  .timed-sections-end ~ * {
     visibility: visible !important;
   }
 </style>
@@ -195,7 +203,7 @@
 {% endif %}
 
 
-<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
+
 
 {% schema %}
 {
