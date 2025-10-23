@@ -413,6 +413,12 @@
     
     // Apply visibility
     applyVisibility(targetElements, isActive);
+
+    // Mark section as ready (remove early pending pre-hide)
+    if (startSection) {
+      startSection.removeAttribute('data-timedify-pending');
+      startSection.dataset.timedifyReady = 'true';
+    }
   }
 
   // Light MutationObserver for late-loaded sections

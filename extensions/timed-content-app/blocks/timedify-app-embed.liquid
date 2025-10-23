@@ -11,6 +11,9 @@
   .shopify-block[data-timedify-hidden="false"],
   [data-timedify-range][data-timedify-hidden="false"] { visibility: visible !important; }
 
+  /* Hide timed sections immediately until controller marks them ready */
+  .shopify-section[data-timedify-pending="true"] { visibility: hidden !important; }
+
   /* Scoped pre-hide within a section: content after Start is hidden until End */
   .shopify-section .timed-sections-start ~ * { visibility: hidden !important; }
   .shopify-section .timed-sections-end ~ * { visibility: visible !important; }
@@ -29,6 +32,19 @@
 {% if section.settings.debug %}
 <script>window.__timedifyDebug = true;</script>
 {% endif %}
+
+<!-- Tiny inline init: flag sections containing a start marker as pending (pre-hide) -->
+<script>
+  (function(){
+    try {
+      var starts = document.querySelectorAll('.timed-sections-start');
+      for (var i = 0; i < starts.length; i++) {
+        var sec = starts[i].closest('.shopify-section');
+        if (sec) sec.dataset.timedifyPending = 'true';
+      }
+    } catch (e) {}
+  })();
+  </script>
 
 <script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
 
