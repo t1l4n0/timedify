@@ -8,11 +8,25 @@ import { APP_LOCALES, getLocale, type SupportedLocale } from "~/locales";
 // Variante A (robust mit Vite/Remix):
 import polarisStylesUrl from "@shopify/polaris/build/esm/styles.css?url";
 
+const FALLBACK_POLARIS_SEED_STYLES = [
+  ":root{color-scheme:light;--p-color-bg:rgba(241,241,241,1);--p-color-bg-surface:rgba(255,255,255,1);--p-color-text:rgba(48,48,48,1);--p-font-family-sans:'Inter',-apple-system,BlinkMacSystemFont,'San Francisco','Segoe UI',Roboto,'Helvetica Neue',sans-serif;--p-font-size-325:0.8125rem;--p-font-line-height-500:1.25rem;--p-font-weight-regular:450;--p-motion-duration-100:100ms;--p-motion-ease-in:cubic-bezier(0.42,0,1,1);}",
+  "html{font-size:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%;text-rendering:optimizeLegibility;}",
+  "body{margin:0;background-color:var(--p-color-bg);color:var(--p-color-text);min-height:100vh;font-family:var(--p-font-family-sans);font-size:var(--p-font-size-325);line-height:var(--p-font-line-height-500);font-weight:var(--p-font-weight-regular);font-feature-settings:'calt' 0;letter-spacing:initial;-webkit-font-smoothing:antialiased;}",
+  "button{font-family:var(--p-font-family-sans);}",
+].join("");
+
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://cdn.shopify.com", crossOrigin: "anonymous" },
   { rel: "dns-prefetch", href: "https://img.youtube.com" },
   { rel: "preconnect", href: "https://img.youtube.com", crossOrigin: "anonymous" },
+  {
+    rel: "preload",
+    href: "https://cdn.shopify.com/static/fonts/inter/v4/styles.css",
+    as: "style",
+    crossOrigin: "anonymous",
+  },
   { rel: "stylesheet", href: "https://cdn.shopify.com/static/fonts/inter/v4/styles.css" },
+  { rel: "preload", href: polarisStylesUrl, as: "style" },
   { rel: "stylesheet", href: polarisStylesUrl },
 ];
 
@@ -106,6 +120,12 @@ function AppWithTranslations({
             suppressHydrationWarning
             dangerouslySetInnerHTML={{
               __html: createAppBridgeConfigScript({ apiKey, host, shop }),
+            }}
+          />
+          <style
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: FALLBACK_POLARIS_SEED_STYLES,
             }}
           />
           <Meta />
