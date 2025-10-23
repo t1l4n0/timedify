@@ -125,7 +125,6 @@ function AppWithTranslations({
           <style
             suppressHydrationWarning
             dangerouslySetInnerHTML={{
-              __html: FALLBACK_POLARIS_SEED_STYLES,
             }}
           />
           <Meta />
