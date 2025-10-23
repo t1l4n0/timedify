@@ -97,11 +97,12 @@
 }
 </style>
 
-{% comment %}FOUC Prevention - always load JavaScript controller{% endcomment %}
+{% comment %}FOUC Prevention + JS controller{% endcomment %}
 {% if request.design_mode == false %}
 <style>
   /* Hide all content between start and end until JS validates timing */
   [data-timedify-range] {
+    display: none !important;
     visibility: hidden !important;
   }
   
@@ -135,6 +136,7 @@
   }
 
 </style>
+<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
 {% endif %}
 
 {% if request.design_mode %}<div class="timedify-editor-spacing">{% endif %}
