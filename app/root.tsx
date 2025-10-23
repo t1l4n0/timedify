@@ -12,7 +12,14 @@ export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://cdn.shopify.com", crossOrigin: "anonymous" },
   { rel: "dns-prefetch", href: "https://img.youtube.com" },
   { rel: "preconnect", href: "https://img.youtube.com", crossOrigin: "anonymous" },
+  {
+    rel: "preload",
+    href: "https://cdn.shopify.com/static/fonts/inter/v4/styles.css",
+    as: "style",
+    crossOrigin: "anonymous",
+  },
   { rel: "stylesheet", href: "https://cdn.shopify.com/static/fonts/inter/v4/styles.css" },
+  { rel: "preload", href: polarisStylesUrl, as: "style" },
   { rel: "stylesheet", href: polarisStylesUrl },
 ];
 
@@ -106,6 +113,12 @@ function AppWithTranslations({
             suppressHydrationWarning
             dangerouslySetInnerHTML={{
               __html: createAppBridgeConfigScript({ apiKey, host, shop }),
+            }}
+          />
+          <style
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: `:root{color-scheme:light;}body{margin:0;background-color:#f4f6f8;color:#202223;min-height:100vh;-webkit-font-smoothing:antialiased;}`,
             }}
           />
           <Meta />
