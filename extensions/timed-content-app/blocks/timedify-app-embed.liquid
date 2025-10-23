@@ -5,6 +5,8 @@
 <style>
   /* Reserve layout; JS decides final visibility */
   [data-timedify-range] { visibility: hidden !important; }
+  [data-timedify-range][data-timedify-hidden="true"] { display: none !important; visibility: hidden !important; }
+  [data-timedify-range][data-timedify-hidden="false"] { display: block !important; visibility: visible !important; }
   .shopify-section[data-timedify-hidden="true"],
   .shopify-block[data-timedify-hidden="true"] { visibility: hidden !important; }
   .shopify-section[data-timedify-hidden="false"],
@@ -15,18 +17,18 @@
   .shopify-section[data-timedify-pending="true"] { visibility: hidden !important; }
 
   /* Scoped pre-hide within a section: content after Start is hidden until End */
-  .shopify-section .timed-sections-start ~ * { visibility: hidden !important; }
-  .shopify-section .timed-sections-end ~ * { visibility: visible !important; }
+  .shopify-section .timed-sections-start ~ * { display: none !important; visibility: hidden !important; }
+  .shopify-section .timed-sections-end ~ * { display: initial !important; visibility: visible !important; }
 
   /* Stronger pre-hide using :has() (supported in evergreen browsers) */
   /* Single-section: hide siblings after start within the same section */
-  .shopify-section:has(.timed-sections-start) .timed-sections-start ~ * { visibility: hidden !important; }
-  .shopify-section:has(.timed-sections-end) .timed-sections-end ~ * { visibility: visible !important; }
+  .shopify-section:has(.timed-sections-start) .timed-sections-start ~ * { display: none !important; visibility: hidden !important; }
+  .shopify-section:has(.timed-sections-end) .timed-sections-end ~ * { display: initial !important; visibility: visible !important; }
 
   /* Cross-section: hide sections following a section that contains a start marker */
-  .shopify-section:has(.timed-sections-start) ~ .shopify-section { visibility: hidden !important; }
+  .shopify-section:has(.timed-sections-start) ~ .shopify-section { display: none !important; visibility: hidden !important; }
   /* Re-show sections following a section that contains an end marker */
-  .shopify-section:has(.timed-sections-end) ~ .shopify-section { visibility: visible !important; }
+  .shopify-section:has(.timed-sections-end) ~ .shopify-section { display: initial !important; visibility: visible !important; }
 </style>
 
 {% if section.settings.debug %}
