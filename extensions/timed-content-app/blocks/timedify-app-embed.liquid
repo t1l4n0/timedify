@@ -10,13 +10,17 @@
   .shopify-section[data-timedify-hidden="false"],
   .shopify-block[data-timedify-hidden="false"],
   [data-timedify-range][data-timedify-hidden="false"] { visibility: visible !important; }
+
+  /* Scoped pre-hide within a section: content after Start is hidden until End */
+  .shopify-section .timed-sections-start ~ * { visibility: hidden !important; }
+  .shopify-section .timed-sections-end ~ * { visibility: visible !important; }
 </style>
 
 {% if section.settings.debug %}
 <script>window.__timedifyDebug = true;</script>
 {% endif %}
 
-<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
+<script src="{{ 'timedify-controller.js' | asset_url }}"></script>
 
 {% schema %}
 {
