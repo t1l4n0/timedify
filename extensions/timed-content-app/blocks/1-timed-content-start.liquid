@@ -51,6 +51,9 @@
     assign should_show = true
   endif
   
+  # Content type will be determined by JavaScript controller
+  # Liquid cannot reliably detect app blocks in JSON templates
+  assign content_type = 'auto-detect'
 %}
 
 {% if request.design_mode %}
@@ -94,10 +97,43 @@
 }
 </style>
 
+{% comment %}FOUC Prevention - always load JavaScript controller{% endcomment %}
+{% if request.design_mode == false %}
+<style>
+  /* Hide all content between start and end until JS validates timing */
+  [data-timedify-range] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Immediate FOUC prevention - hide content that will be controlled */
+  .shopify-section[data-timedify-hidden="true"],
+  .shopify-block[data-timedify-hidden="true"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Override for active content - allow JS to show content when active */
+  .shopify-section[data-timedify-hidden="false"],
+  .shopify-block[data-timedify-hidden="false"] {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Generic override for any controlled element once active */
+  [data-timedify-range][data-timedify-hidden="false"] {
+    display: block !important;
+    visibility: visible !important;
+  }
+</style>
+{% endif %}
+
 {% if request.design_mode %}<div class="timedify-editor-spacing">{% endif %}
 <div id="timed-sections-start-{{ block.id }}"
      class="timed-sections-start"
      data-start-datetime="{% if block.settings.start_date %}{{ block.settings.start_date }} {{ block.settings.start_time | default: '00:00' }}{% endif %}"
+     data-needs-js-controller="true"
+     data-content-type="{{ content_type }}"
      style="{% unless request.design_mode %}display:none!important;{% endunless %}">
   {% if request.design_mode %}
   <div class="ts-marker">
@@ -111,6 +147,13 @@
           Always visible (no dates set)
         </div>
       {% endif %}
+      
+      <div style="margin-top: 8px; padding: 8px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; font-size: 11px;">
+        <div style="color: #0c5460;">
+          💡 Place your timed content sections after this block. Don't forget to add an "Timed Content: End" block after your content.
+        </div>
+      </div>
+      
       
     </div>
   </div>
@@ -151,9 +194,8 @@
   </div>
 {% endif %}
 
-{% if should_load %}
-  <script src="{{ 'timed-sections.js' | asset_url }}" defer></script>
-{% endif %}
+
+<script src="{{ 'timedify-controller.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

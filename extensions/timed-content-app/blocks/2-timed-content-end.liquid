@@ -34,6 +34,14 @@
 {% endif %}
 
 {% if should_load %}
+{% liquid
+  # Content type will be determined by JavaScript controller
+  # Liquid cannot reliably detect app blocks in JSON templates
+  assign content_type = 'auto-detect'
+%}
+
+{% comment %}All timing logic now handled by JavaScript controller{% endcomment %}
+
 {% if request.design_mode %}
 <style>
 .timedify-editor-spacing { margin: 32px 0; }
@@ -56,6 +64,7 @@
 <div id="timed-sections-end-{{ block.id }}"
      class="timed-sections-end"
      data-end-datetime="{% if block.settings.end_date %}{{ block.settings.end_date }} {{ block.settings.end_time | default: '23:59' }}{% endif %}"
+     data-content-type="{{ content_type }}"
      style="{% unless request.design_mode %}display:none!important;{% endunless %}">
   {% if request.design_mode %}
   <div class="ts-end-marker">
@@ -69,11 +78,8 @@
     {% endif %}
     
     <div style="margin-top: 8px; padding: 8px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; font-size: 11px;">
-      <div style="color: #0c5460; font-weight: bold; margin-bottom: 4px;">
-        💡 Usage tip
-      </div>
       <div style="color: #0c5460;">
-        Make sure to place a "Timed Content: Start" block before your content to control when it becomes visible.
+        💡 Make sure to place a "Timed Content: Start" block before your content to control when it becomes visible.
       </div>
     </div>
   </div>

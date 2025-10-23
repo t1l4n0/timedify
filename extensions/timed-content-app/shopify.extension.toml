@@ -5,6 +5,7 @@ type = "theme_app_extension"
 [capabilities]
 theme_editor_integration = true
 
+
 [build]
 command = ""
 watch = []
