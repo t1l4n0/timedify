@@ -125,14 +125,6 @@
     visibility: visible !important;
   }
 
-  /* Pre-hide everything after Start within the same container to reduce FOUC */
-  .timed-sections-start ~ * {
-    visibility: hidden !important;
-  }
-  /* Re-show default content after End marker */
-  .timed-sections-end ~ * {
-    visibility: visible !important;
-  }
 </style>
 {% endif %}
 

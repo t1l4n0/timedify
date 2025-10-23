@@ -1,22 +1,15 @@
 {% comment %}
-  Timedify App Embed: Loads early in <head> to minimize FOUC
+  Timedify App Embed Block: loads in <head> to reduce FOUC
 {% endcomment %}
 
 <style>
-  /* Global pre-hide until JS validates timing (reserve layout) */
+  /* Reserve layout; JS decides final visibility */
   [data-timedify-range] { visibility: hidden !important; }
-
-  /* Hide containers marked by JS as hidden; show when active */
   .shopify-section[data-timedify-hidden="true"],
   .shopify-block[data-timedify-hidden="true"] { visibility: hidden !important; }
-
   .shopify-section[data-timedify-hidden="false"],
   .shopify-block[data-timedify-hidden="false"],
   [data-timedify-range][data-timedify-hidden="false"] { visibility: visible !important; }
-
-  /* Pre-hide everything after Start; re-show after End (no layout shift) */
-  .timed-sections-start ~ * { visibility: hidden !important; }
-  .timed-sections-end ~ * { visibility: visible !important; }
 </style>
 
 {% if section.settings.debug %}
@@ -27,7 +20,7 @@
 
 {% schema %}
 {
-  "name": "Timedify App Embed",
+  "name": "Timedify App Embed (Head)",
   "target": "head",
   "settings": [
     {
