@@ -57,3 +57,33 @@ model DeadLetter {
 
   @@map("dead_letters")
 }
+
+// Web Vital Events für Performance-Monitoring (Core Web Vitals)
+model WebVitalEvent {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  ts             DateTime
+  kind           String   // 'INP' | 'CLS' | 'LCP' | 'FCP' | 'TTFB'
+  value          Float    // CLS ist dimensionless, andere in ms
+  rating         String   // 'good' | 'needs-improvement' | 'poor'
+  navigationType String? 
+  path           String?
+  clientHash     String   // pseudonymisiert (SHA256-Hash)
+  
+  @@index([kind, ts])
+  @@index([rating, ts])
+  @@map("web_vital_events")
+}
+
+// Session Token Authentication Events für Built-for-Shopify Compliance
+model SessionTokenEvent {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  success     Boolean
+  shopHash    String   // pseudonymisiert (SHA256-Hash)
+  endpoint   String   // z.B. '/api/ping', '/api/sync-subscription'
+  
+  @@index([createdAt])
+  @@index([success, createdAt])
+  @@map("session_token_events")
+}

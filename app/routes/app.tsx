@@ -8,6 +8,8 @@ import { useI18n } from "@shopify/react-i18n";
 import { POLARIS_LOCALES, getLocale } from "~/locales";
 import type { RootLoaderData } from "~/root";
 import { syncSubscriptionStatusToMetafield } from "~/utils/billing";
+import { useEffect } from "react";
+import { enableINPTracking, sendWebVital, trackAppBridgeMetrics } from "~/utils/metrics";
 
 export const APP_ROUTE_ID = "routes/app" as const;
 
@@ -80,6 +82,13 @@ export default function AppLayout() {
   const { host } = rootData;
   
   // App Bridge wird automatisch via CDN-Script in root.tsx initialisiert
+  
+  // Web Vitals & App Bridge Tracking für Performance-Monitoring aktivieren
+  useEffect(() => {
+    const sample = Number(import.meta.env.VITE_WEB_VITALS_SAMPLE_RATE ?? 1.0);
+    enableINPTracking(sendWebVital, sample);
+    trackAppBridgeMetrics(sendWebVital);
+  }, []);
   
   if (!apiKey || !shop || !host) {
     return (
