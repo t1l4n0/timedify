@@ -116,12 +116,12 @@ export default function Index() {
         {showWelcomeBanner && (
           <Layout.Section>
             <Banner
-              title="Quick tip"
+              title="Tip: Schedule multiple time windows"
               tone="info"
               action={{ content: 'Got it', onAction: handleDismissWelcome }}
             >
               <p>
-                This short tip appears once per session.
+                Wrap your content with "⏰ 1. Timed Content: Start" and "⏰ 2. Timed Content: End". You can add multiple pairs to schedule separate windows. Timedify hides content automatically outside each window.
               </p>
             </Banner>
           </Layout.Section>
