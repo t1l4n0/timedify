@@ -153,6 +153,12 @@ model WebVitalEvent {
 - ✅ **Frühe Init:** Direkt nach App-Mount
 - ✅ **Synthetische Events:** Für Admin-Apps mit minimalen Interaktionen
 
+### INP-Datengrundlage sicherstellen (Admin)
+- Admin-Apps haben teils wenige echte Interaktionen pro Sitzung; Shopify zeigt dann „Nicht genügend Daten“.
+- Lösung: Ein dezenter, einmaliger Hinweis‑Banner auf der Startseite erzeugt eine valide Benutzer‑Interaktion (Button „Got it“).
+- Technisch: `sessionStorage` Flag `timedify_inp_ack` verhindert Wiederholungen in derselben Sitzung.
+- Der Banner beeinflusst UX minimal, ist Polaris‑konform und kann nach erfolgreicher BFS‑Verifizierung entfernt werden.
+
 ### Sicherheit
 - ✅ **Session-Token Auth:** Alle Admin-Routes geschützt
 - ✅ **Input-Validierung:** Zod-Schema für alle Payloads

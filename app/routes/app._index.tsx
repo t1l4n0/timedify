@@ -31,6 +31,7 @@ export default function Index() {
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [syncData, setSyncData] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const authenticatedFetch = useAuthenticatedFetch();
   const hasPingedRef = useRef(false);
 
@@ -46,6 +47,21 @@ export default function Index() {
       // still und leise fehlschlagen; dient nur dem Nachweis der Token-Nutzung
     });
   }, [authenticatedFetch]);
+
+  // Einmaliger Hinweisbanner pro Sitzung, um eine echte Interaktion zu erzeugen
+  useEffect(() => {
+    try {
+      const seen = typeof window !== 'undefined' ? sessionStorage.getItem('timedify_inp_ack') : '1';
+      setShowWelcomeBanner(!seen);
+    } catch {
+      setShowWelcomeBanner(true);
+    }
+  }, []);
+
+  const handleDismissWelcome = useCallback(() => {
+    try { sessionStorage.setItem('timedify_inp_ack', '1'); } catch {}
+    setShowWelcomeBanner(false);
+  }, []);
 
   const goToAdmin = useCallback(
     (adminPath: string) => {
@@ -97,6 +113,19 @@ export default function Index() {
   return (
     <Page title="Timedify - Time-Controlled Content">
       <Layout>
+        {showWelcomeBanner && (
+          <Layout.Section>
+            <Banner
+              title="Quick tip"
+              tone="info"
+              action={{ content: 'Got it', onAction: handleDismissWelcome }}
+            >
+              <p>
+                This short tip appears once per session.
+              </p>
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Banner
             title={hasActiveSub ? 'Subscription active' : 'No active subscription'}

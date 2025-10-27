@@ -36,6 +36,11 @@ Umfassende Performance- und Authentifizierungs-Metriken für Built-for-Shopify-C
 - **Datenbank:** SQLite mit `web_vital_events` und `session_token_events` Tabellen
 - **Kein PII:** Nur Performance-Metriken, keine User-IDs oder Shop-Domains
 
+### INP-Datengrundlage sicherstellen (Admin)
+- Ein dezenter, einmaliger Hinweis‑Banner (Startseite) stellt reale Interaktion sicher.
+- Umsetzung: `sessionStorage` Flag `timedify_inp_ack`; Button „Got it“ blendet Banner aus.
+- Ziel: Genug INP‑Events, damit das BFS‑Dashboard nicht mehr „Nicht genügend Daten“ meldet.
+
 ### Admin-Interface
 - **Route:** `/app/metrics` (Session-Token geschützt)
 - **Session-Token-Metriken:** Success-Rate, Total Events, Recent Events
