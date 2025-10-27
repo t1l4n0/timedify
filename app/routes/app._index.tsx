@@ -118,7 +118,7 @@ export default function Index() {
             <Banner
               title="Tip: Schedule multiple time windows"
               tone="info"
-              action={{ content: 'Got it', onAction: handleDismissWelcome }}
+              onDismiss={handleDismissWelcome}
             >
               <p>
                 Add multiple Start/End pairs to schedule separate windows. Content outside each window is hidden automatically.
